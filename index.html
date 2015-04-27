@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<title>HTML</title>
+		<style>
+		.dot{
+			
+		}
+		
+		.groupA{
+			
+		}
+		
+		.groupB{
+			
+		}
+		
+		</style>
+		<script src="d3.min.js"></script>
+	</head>
+<body>
+</body>
+<script>
+/******************************************
+ SIZE VARIABLES
+ ******************************************/
+var graphHeight = 200, graphWidth = 200;
+var problemSelectorHeight = 100;
+var margin = {top: 20, right: 20, bottom: 20, left: 20};
+var width = (6*graphWidth) + (5*margin.left), height = (2*graphHeight) + (1*margin.left) + problemSelectorHeight;
+var defaultRange = [0, 500]; //for visual mapping, so should be same for all graphs?
+/******************************************
+ AXES AND SCALES
+ ******************************************/
+//Create scales NOTE SCALES != 
+//TODO one x for each of: NumberProblemsCompleted	NumberAPCompleted	PercentAPCorrect	PercentTimeOnTask	PercentTimeOffTask	PercentTimeIdle
+var x_numberProblemsCompleted = d3.scale.linear()
+	.domain([0, 10])
+    .range(defaultRange);
+
+var x_numberAPCompleted = d3.scale.linear()
+	.domain([0, 10])
+    .range(defaultRange);
+    
+var y = d3.scale.linear()
+    //.range([height, 0]);
+    .range([-20, 20]);
+
+//Create axes
+var xAxis_numberProblemsCompleted = d3.svg.axis()
+    .scale(x_numberProblemsCompleted)
+    .orient("bottom");
+
+var xAxis_numberAPCompleted = d3.svg.axis()
+    .scale(x_numberAPCompleted)
+    .orient("bottom");
+    
+var yAxis = d3.svg.axis()
+    .scale(y)
+    .orient("left")
+    //.ticks(10, "%")
+    ;
+/******************************************
+ ATTACHING VARIABLES TO SVG
+ ******************************************/
+/*nesting: see http://bl.ocks.org/mbostock/1157787 or http://bl.ocks.org/mbostock/9490516 */
+
+//STUDENT DATA
+var studentDataset = [];
+	d3.csv("students.csv", function(data){
+		studentDataset = data.map(function(d){return d;});
+		console.log(studentDataset);	
+	});
+
+ // Nest student data by pretest
+var nestedStudents = d3.nest()
+      .key(function(d) { return d.PreTestType; })
+      .entries(studentDataset);
+
+//PROBLEMS CORRECT/INCORRECT DATA
+var problemsDataset = [];
+	d3.csv("problems.csv", function(data){
+		problemsDataset = data.map(function(d){return d;});
+		console.log(problemsDataset);	
+	});
+
+x_numberProblemsCompleted.domain(studentDataset.map(function(d) { return d.NumberProblemsCompleted; }));
+x_numberAPCompleted.domain(studentDataset.map(function(d) { return d.NumberAPCompleted; }));
+
+var svg = d3.select("body").append("svg")
+    .attr("width", width)
+    .attr("height", height)
+  .append("g");
+
+  svg.append("g")
+      .attr("class", "x_numberProblemsCompleted x axis")
+      .call(xAxis_numberProblemsCompleted);
+  
+    svg.append("g")
+      .attr("class", "x_numberAPCompleted y axis")
+      .attr("transform", "translate(" + graphWidth + ", 0)")
+      .call(xAxis_numberAPCompleted);
+
+  svg.append("g")
+      .attr("class", "y axis")
+      .call(yAxis)
+    .append("text")
+      .attr("transform", "rotate(-90)")
+      .attr("y", 6)
+      .attr("dy", ".71em")
+      .style("text-anchor", "end")
+      .text("Learning Gains");
+
+//create 2 rows of graphs, for A and B
+var svg = d3.select("body").selectAll("svg") 
+      .data(nestedStudents)
+    .enter().append("svg")
+      .attr("width", width)
+      .attr("height", height/2)
+    .append("g");
+    
+</script>
+</html>
