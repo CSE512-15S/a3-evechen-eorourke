@@ -1,0 +1,19 @@
+- help vs performance
+- break down by item and student
+- students -> 
+	- tooltips? 
+	- brushing/ filtering (selecting) by school or class
+- factors
+	- Y: learning gains = pre-post scores difference
+	- X(small multiples): # problems completed, # AP problems completed, % AP problems correct, % time on task vs off task vs idle
+
+toggle: pre or post test
+bars: 2 bars per question, %A correct and % B correct
+small multiples: tablet vs paper condition vs table+paper combined
+- select/deselect all toggle, click on each bar to toggle
+- pre/post toggle (maybe unit toggle also) -> exclude kids who didn't do both pre and post test
+- smaller dots/circles
+- click on correct, incorrect or both bars to select which to view
+	- clicking multiple bars means must fulfill ALL conditions
+
+- future: maybe kids were doing a lot of easy problems
