@@ -13,12 +13,20 @@
 			fill: #4169E1;
 		}
 		
-		.A.bar{
+		.A.correctbar{
 			fill: #FFA500;
 		}
 		
-		.B.bar{
+		.B.correctbar{
 			fill: #4169E1;
+		}
+		
+		.A.incorrectbar{
+			fill: #E9967A;
+		}
+		
+		.B.incorrectbar{
+			fill: #6A5ACD;
 		}
 		
 		svg{
@@ -34,7 +42,7 @@ Layout and appearance variables
 var graphHeight = 200, graphWidth = 200;
 var problemSelectorHeight = 100;
 var margin = {top: 50, right: 50, bottom: 50, left: 50};
-var width = (7*graphWidth) + (8*margin.left), height = (2*graphHeight) + (3*margin.top) + problemSelectorHeight;
+var width = (7*graphWidth) + (8*margin.left), height = (2*graphHeight) + (3*margin.top) + 2*problemSelectorHeight;
 var defaultRange = [0, graphWidth]; //for visual mapping, so should be same for all graphs?
 var barWidth = 20;
 var barMargin = {top: 10, right: 10, bottom: 10, left: 10};
@@ -154,18 +162,18 @@ Map problem correctness data to bottom bar
 		
     //TODO alter the range based on actual learning gains range?
 	var barsY = d3.scale.linear()
-		.domain([0, 100])
-		.range([100, 0]); 
+		.domain([0, 1])
+		.range([0, 100]); 
 
 	var barsYAxis = d3.svg.axis()
-		.scale(y)
+		.scale(barsY)
 		.orient("left")
-		.ticks(10, "%");	
+		.ticks(2, "%");	
 		
 	//Y Axis, percentage
 	barsholder.append("g")
 		  .attr("class", "barsYAxis")
-		  .call(yAxis)
+		  .call(barsYAxis)
 		.append("text")
 		  .attr("transform", "rotate(-90)")
 		  .attr("y", 6)
@@ -184,14 +192,31 @@ d3.csv("problems.csv", function(data){
 	//Default: map data for unit 2, pretest
 	d3.selectAll(groups)
 		.each(function(d2, j){ 
-			var bars = barsholder.selectAll("rect")
+			//TODO how to get the incorrect bars showing too??
+			var oneTypesBars = barsholder.append("g")
+					.attr("class", "oneTypesBars")
+					.attr("width", width)
+					.attr("height", problemSelectorHeight)
+			
+			oneTypesBars.selectAll("rect")
 				.data(groups[j].values)
-				.enter().append("rect")
-				  .attr("class", function(d) { return d.Unit2_PreTestType + " bar";})
-				  .attr("x", function(d) { return 10; })
+				.enter()
+				.append("rect") //correct
+				  .attr("class", function(d) { return d.Type + " correctbar";})
+				  .attr("x", function(d, i) { return (j*barWidth)+i*(barMargin.left+(graphWidth/3)); })
 				  .attr("width", barWidth)
-				  .attr("y", function(d) { return 10; })
-				  .attr("height", function(d) { return 10; });					
+				  .attr("y", function(d){ return problemSelectorHeight - barsY(+d.NumCorrectPre/(+d.NumCorrectPre+(+d.NumIncorrectPre)));})
+				  .attr("height", function(d) { return barsY(+d.NumCorrectPre/(+d.NumCorrectPre+(+d.NumIncorrectPre))); })	
+					
+			oneTypesBars.selectAll("rect")
+				.data(groups[j].values)
+				.enter()
+				.append("rect") //incorrect
+				  .attr("class", function(d) { return d.Type + " incorrectbar";})
+				  .attr("x", function(d, i) { return (j*barWidth)+i*(barMargin.left+(graphWidth/3)); })
+				  .attr("width", barWidth)
+				  .attr("y", function(d) { return barsY(+d.NumCorrectPre/(+d.NumCorrectPre+(+d.NumIncorrectPre)))*problemSelectorHeight; }) //offset accordingly
+				  .attr("height", function(d) { return barsY(+d.NumIncorrectPre/(+d.NumCorrectPre+(+d.NumIncorrectPre))); })					
 		});		
 	
 	
