@@ -7,10 +7,11 @@
 	- Y: learning gains = pre-post scores difference
 	- X(small multiples): # problems completed, # AP problems completed, % AP problems correct, % time on task vs off task vs idle
 
-toggle: pre or post test
+toggle: pre unit 2 or post unit 2, pre unit 4, post unit 4
 bars: 2 bars per question, %A correct and % B correct
+color = if they did A or B (orange vs blue)
 small multiples: tablet vs paper condition vs table+paper combined
-- select/deselect all toggle, click on each bar to toggle
+- select/deselect all toggle, click on each bar to toggle (join over which questions)
 - pre/post toggle (maybe unit toggle also) -> exclude kids who didn't do both pre and post test
 - smaller dots/circles
 - click on correct, incorrect or both bars to select which to view
