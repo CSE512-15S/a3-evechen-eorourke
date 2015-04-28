@@ -13,6 +13,10 @@
 			fill: #4169E1;
 		}
 		
+		.unknown.dot{
+			fill: #000000;
+		}
+		
 		.A.correctbar{
 			fill: #FFA500;
 		}
@@ -85,11 +89,11 @@ Global(?) functions/variables - maybe put into their individual callbacks to pre
 /******************************
 Map student data to graphs
 ******************************/	
-	d3.csv("students.csv", function(data){
+	d3.csv("students2.csv", function(data){
 
 			//Assign loaded data to variables
 			studentDataset = data.map(function(d){return d;});
-			graphParams = d3.keys(data[0]).slice(7, 13); //only select the 6 parameters we want to make graphs for
+			graphParams = d3.keys(data[0]).slice(14, 20); //only select the 6 parameters we want to make graphs for
 			
 			//Nest by condition (tablet, paper)
 			var groups = d3.nest()
@@ -139,8 +143,23 @@ Map student data to graphs
 					var dots = holder.selectAll("circle")
 						.data(groups[j].values)
 						.enter().append("circle")
-							.attr("class", function(d) { return d.Unit2_PreTestType + " dot";})
-							.attr("transform", function(d) { return "translate(" + x(+d[graphParams[i]]) + "," + y(+d["Learning Gains"]) + ")";})
+							.attr("class", function(d) { 
+									var t = d["Unit 2 Pre-Test Type"].toUpperCase();
+									if(t == "A" || t == "B")
+									return t + " dot";
+									else
+									return "unknown dot";
+								})
+							.attr("transform", function(d) { 
+										var gains = d["Unit 2 Learning Gain"];
+										var cat = +d[graphParams[i]];
+										
+										if(isNaN(gains) || isNaN(cat))
+											return "translate(0,0)";
+										else
+											return "translate(" + x(cat) + "," + y(+gains) + ")";
+									})
+							.attr("opacity", function(d){ return (d["Unit 2 Learning Gain"] == "null") ? 0 : 1;})
 							.attr("cy", 0)
 							.attr("cx", 0)
 							.attr("r", 2);
