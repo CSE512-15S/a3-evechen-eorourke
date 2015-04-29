@@ -230,7 +230,7 @@ Map problem correctness data to bottom bar
 		
     //TODO alter the range based on actual learning gains range?
 	var barsY = d3.scale.linear()
-		.domain([1, 0])
+		.domain([0, 1])
 		.range([100, 0]); 
 
 	var barsYAxis = d3.svg.axis()
@@ -304,8 +304,8 @@ d3.csv("problems2.csv", function(data){
 									  .attr("class", function(d) { return d.Type + " correctbar";})
 									  .attr("x", function(d, i) { return (j*barWidth)+i*((graphWidth/4)); })
 									  .attr("width", barWidth)
-									  .attr("y", function(d){ return problemSelectorHeight - barsY(+d[corr]/(+d[corr]+(+d[incorr])));})
-									  .attr("height", function(d) {return barsY(+d[corr]/(+d[corr]+(+d[incorr]))); });	
+									  .attr("y", function(d){ return barsY(+d[corr]/(+d[corr]+(+d[incorr])));})
+									  .attr("height", function(d) {return problemSelectorHeight - barsY(+d[corr]/(+d[corr]+(+d[incorr]))); });	
 							correctBars.exit()
 									.remove();
 
@@ -319,7 +319,7 @@ d3.csv("problems2.csv", function(data){
 							incorrectBars
 								.attr("class", function(d) { return d.Type + " incorrectbar";})
 								.attr("x", function(d, i) { return (j*barWidth)+i*((graphWidth/4)); })
-								.attr("height", function(d) { return barsY(+d[incorr]/(+d[corr]+(+d[incorr]))); });
+								.attr("height", function(d) { return problemSelectorHeight - barsY(+d[incorr]/(+d[corr]+(+d[incorr]))); });
 							incorrectBars.exit()
 									.remove();		
 					   });
