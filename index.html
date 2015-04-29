@@ -248,7 +248,31 @@ Map problem correctness data to bottom bar
 		  .attr("dy", ".71em")
 		  .style("text-anchor", "end")
 		  .text("%");
- 
+		  
+	//TODO clean this part up a bit? forloop + array for class names, maybe
+	//Holders for correct bars
+	barsholder.append("g")
+	   .attr("class", "correctBarsA oneBarTypeHolder")
+	   .attr("width", width)
+	   .attr("height", problemSelectorHeight)
+	
+	barsholder.append("g")
+	   .attr("class", "correctBarsB oneBarTypeHolder")
+	   .attr("width", width)
+	   .attr("height", problemSelectorHeight)
+	   
+	//Holders for incorrect bars
+	barsholder.append("g")
+	   .attr("class", "incorrectBarsA oneBarTypeHolder")
+	   .attr("width", width)
+	   .attr("height", problemSelectorHeight)
+	
+	barsholder.append("g")
+	   .attr("class", "incorrectBarsB oneBarTypeHolder")
+	   .attr("width", width)
+	   .attr("height", problemSelectorHeight)
+	   
+//TODO separate out drawing the gridlines and the bars like I did for the dots
 function drawProblemBars(){    
 d3.csv("problems2.csv", function(data){
 		problemsDataset = data.map(function(d){return d;});
@@ -266,18 +290,17 @@ d3.csv("problems2.csv", function(data){
 					//Map A and B separately for 4 groups of bars: A-correct, A-incorrect, B-correct, B-incorrect 
 					d3.selectAll(this.values)
 						.each(function(dat, j){
+
 							//simplify selection for pre/post
 							var corr = CURRENT_PREPOST + " Correct";
 							var incorr = CURRENT_PREPOST + " Incorrect";
 
-							var correctBars = barsholder.append("g")
-									.attr("class", "correctBars oneBarTypeHolder")
-									.attr("width", width)
-									.attr("height", problemSelectorHeight)
+							var correctBars = barsholder.select(".correctBars" + this.key)
 									.selectAll("rect")
 										.data(this.values);												
 							correctBars.enter()
-									.append("rect") //correct
+									.append("rect");
+							correctBars
 									  .attr("class", function(d) { return d.Type + " correctbar";})
 									  .attr("x", function(d, i) { return (j*barWidth)+i*((graphWidth/4)); })
 									  .attr("width", barWidth)
@@ -286,19 +309,17 @@ d3.csv("problems2.csv", function(data){
 							correctBars.exit()
 									.remove();
 
-							var incorrectBars = barsholder.append("g")
-									.attr("class", "incorrectBars oneBarTypeHolder")
-									.attr("width", width)
-									.attr("height", problemSelectorHeight)
+							var incorrectBars = barsholder.select(".incorrectBars" + this.key)
 									.selectAll("rect")
 										.data(this.values);			
 							incorrectBars.enter()
-									.append("rect") //incorrect
-									  .attr("class", function(d) { return d.Type + " incorrectbar";})
-									  .attr("x", function(d, i) { return (j*barWidth)+i*((graphWidth/4)); })
+									.append("rect")
 									  .attr("width", barWidth)
 									  .attr("y", 0)
-									  .attr("height", function(d) { return barsY(+d[incorr]/(+d[corr]+(+d[incorr]))); });
+							incorrectBars
+								.attr("class", function(d) { return d.Type + " incorrectbar";})
+								.attr("x", function(d, i) { return (j*barWidth)+i*((graphWidth/4)); })
+								.attr("height", function(d) { return barsY(+d[incorr]/(+d[corr]+(+d[incorr]))); });
 							incorrectBars.exit()
 									.remove();		
 					   });
@@ -343,6 +364,7 @@ function switchCondition(e){
 	if(CURRENT_PREPOST != pr || CURRENT_UNIT != un){
 		console.log(CURRENT_PREPOST + " " + CURRENT_UNIT);
 		drawDots();
+		drawProblemBars();
 	}
 }
 //Buttons to switch between Unit, Pre-Post (4 conditions total)
