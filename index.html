@@ -48,7 +48,7 @@ var problemSelectorHeight = 100;
 var margin = {top: 50, right: 50, bottom: 50, left: 50};
 var width = (7*graphWidth) + (8*margin.left), height = (2*graphHeight) + (3*margin.top) + 2*problemSelectorHeight;
 var defaultRange = [0, graphWidth]; //for visual mapping, so should be same for all graphs?
-var barWidth = 20;
+var barWidth = 15;
 var barMargin = {top: 10, right: 10, bottom: 10, left: 10};
 /******************************************
 Global(?) functions/variables - maybe put into their individual callbacks to prevent accidentally overwriting axes/scale info
@@ -57,6 +57,10 @@ Global(?) functions/variables - maybe put into their individual callbacks to pre
 	var graphParams = [];
     var studentDataset = [];
     var problemsDataset = [];
+    
+    //Default starting variables
+    var CURRENT_UNIT = "2";
+    var CURRENT_PREPOST= "Pre"; 
     
     //the main SVG
     var svg = d3.select("body").append("svg")
@@ -98,15 +102,13 @@ Map student data to graphs
 			var groups = d3.nest()
 				 .key(function(d) { return d.Condition; })
 				 .entries(data);
-	
-			console.log(groups);
-			console.log(studentDataset);
+
 			//alter the range for Y axis
-			y.domain(d3.extent(studentDataset, function(d) { return +d["Unit 2 Learning Gain"];}));
+			y.domain(d3.extent(studentDataset, function(d) { return +d["Unit " + CURRENT_UNIT + " Learning Gain"];}));
+			
 			//Create a separate scale+axis for each parameter we care about
 			d3.selectAll(groups)
 				.each(function(d2, j){ 
-					console.log(groups[j]);
 					d3.selectAll(graphParams)
 					.each(function(d, i) {
 					
@@ -159,7 +161,7 @@ Map student data to graphs
 										else
 											return "translate(" + x(cat) + "," + y(+gains) + ")";
 									})
-							.attr("opacity", function(d){ return (d["Unit 2 Learning Gain"] == "null") ? 0 : 1;})
+							.attr("opacity", function(d){ return (d["Unit " + CURRENT_UNIT + " Learning Gain"] == "null") ? 0 : 1;})
 							.attr("cy", 0)
 							.attr("cx", 0)
 							.attr("r", 2);
@@ -181,7 +183,7 @@ Map problem correctness data to bottom bar
 		
     //TODO alter the range based on actual learning gains range?
 	var barsY = d3.scale.linear()
-		.domain([0, 1])
+		.domain([1, 0])
 		.range([100, 0]); 
 
 	var barsYAxis = d3.svg.axis()
@@ -200,47 +202,60 @@ Map problem correctness data to bottom bar
 		  .style("text-anchor", "end")
 		  .text("%");
     
-d3.csv("problems.csv", function(data){
+d3.csv("problems2.csv", function(data){
 	problemsDataset = data.map(function(d){return d;});
 	
-	//Nest by type (A or B) - may need to do a nest for Unit also if we want to switch between those
+	//Nest by Unit
 	var groups = d3.nest()
+		 .key(function(d) { return d.Unit; })
 		 .key(function(d) { return d.Type; })
 		 .entries(data);
 	
-	//Default: map data for unit 2, pretest
+	//Default: Unit 2 Pretest (alter CURRENT_PREPOST and CURRENT_UNIT to change what gets displayed)
+	
+	//Select all rows of current unit
 	d3.selectAll(groups)
-		.each(function(d2, j){ 
-			//TODO how to get the incorrect bars showing too??
-			var correctBars = barsholder.append("g")
-					.attr("class", "correctBars oneBarTypeHolder")
-					.attr("width", width)
-					.attr("height", problemSelectorHeight)
-					
-			var incorrectBars = barsholder.append("g")
-					.attr("class", "incorrectBars oneBarTypeHolder")
-					.attr("width", width)
-					.attr("height", problemSelectorHeight)		
-						
-			correctBars.selectAll("rect")
-				.data(groups[j].values)
-				.enter()
-				.append("rect") //correct
-				  .attr("class", function(d) { return d.Type + " correctbar";})
-				  .attr("x", function(d, i) { return (j*barWidth)+i*(barMargin.left+(graphWidth/3)); })
-				  .attr("width", barWidth)
-				  .attr("y", function(d){ return problemSelectorHeight - barsY(+d.NumCorrectPre/(+d.NumCorrectPre+(+d.NumIncorrectPre)));})
-				  .attr("height", function(d) { return barsY(+d.NumCorrectPre/(+d.NumCorrectPre+(+d.NumIncorrectPre))); })	
-					
-			incorrectBars.selectAll("rect")
-				.data(groups[j].values)
-				.enter()
-				.append("rect") //incorrect
-				  .attr("class", function(d) { return d.Type + " incorrectbar";})
-				  .attr("x", function(d, i) { return (j*barWidth)+i*(barMargin.left+(graphWidth/3)); })
-				  .attr("width", barWidth)
-				  .attr("y", 0) //offset accordingly
-				  .attr("height", function(d) { return barsY(+d.NumIncorrectPre/(+d.NumCorrectPre+(+d.NumIncorrectPre))); })					
+		.each(function(d2, k){ 
+			if(this.key == CURRENT_UNIT){
+				console.log(this);
+				//Map A and B separately for 4 groups of bars: A-correct, A-incorrect, B-correct, B-incorrect 
+				d3.selectAll(this.values)
+					.each(function(dat, j){
+						console.log(this);
+						var correctBars = barsholder.append("g")
+								.attr("class", "correctBars oneBarTypeHolder")
+								.attr("width", width)
+								.attr("height", problemSelectorHeight)
+	
+						var incorrectBars = barsholder.append("g")
+								.attr("class", "incorrectBars oneBarTypeHolder")
+								.attr("width", width)
+								.attr("height", problemSelectorHeight)		
+
+						//simplify selection for pre/post
+						var corr = CURRENT_PREPOST + " Correct";
+						var incorr = CURRENT_PREPOST + " Incorrect";					
+						correctBars.selectAll("rect")
+							.data(this.values)
+							.enter()
+							.append("rect") //correct
+							  .attr("class", function(d) { return d.Type + " correctbar";})
+							  .attr("x", function(d, i) { return (j*barWidth)+i*((graphWidth/4)); })
+							  .attr("width", barWidth)
+							  .attr("y", function(d){ return problemSelectorHeight - barsY(+d[corr]/(+d[corr]+(+d[incorr])));})
+							  .attr("height", function(d) {return barsY(+d[corr]/(+d[corr]+(+d[incorr]))); })	
+	
+						incorrectBars.selectAll("rect")
+							.data(this.values)
+							.enter()
+							.append("rect") //incorrect
+							  .attr("class", function(d) { return d.Type + " incorrectbar";})
+							  .attr("x", function(d, i) { return (j*barWidth)+i*((graphWidth/4)); })
+							  .attr("width", barWidth)
+							  .attr("y", 0)
+							  .attr("height", function(d) { return barsY(+d[incorr]/(+d[corr]+(+d[incorr]))); });		
+				   });
+			}					
 		});		
 	
 	
