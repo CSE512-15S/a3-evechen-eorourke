@@ -33,6 +33,17 @@
 			fill: #D5D8E4;
 		}
 		
+		.switch{
+			fill: lightgrey;
+		}
+		
+		.switch:hover{
+			fill: grey;
+		}
+		
+		.buttonText{
+			pointer-events:none;
+		}
 		svg{
 		}
 		</style>
@@ -43,13 +54,20 @@
 /******************************************
 Layout and appearance variables 
  ******************************************/
-var graphHeight = 200, graphWidth = 200;
+var graphHeight = 200, 
+	graphWidth = 200;
 var problemSelectorHeight = 100;
 var margin = {top: 50, right: 50, bottom: 50, left: 50};
-var width = (7*graphWidth) + (8*margin.left), height = (2*graphHeight) + (3*margin.top) + 2*problemSelectorHeight;
+var width = (7*graphWidth) + (8*margin.left), 
+	height = (2*graphHeight) + (3*margin.top) + 2*problemSelectorHeight;
+
 var defaultRange = [0, graphWidth]; //for visual mapping, so should be same for all graphs?
+
 var barWidth = 15;
 var barMargin = {top: 10, right: 10, bottom: 10, left: 10};
+
+var buttonHeight = 20, 
+	buttonWidth = 100;
 /******************************************
 Global(?) functions/variables - maybe put into their individual callbacks to prevent accidentally overwriting axes/scale info
  ******************************************/
@@ -80,14 +98,44 @@ Global(?) functions/variables - maybe put into their individual callbacks to pre
 		  .text("Learning Gains");
     }
     
-	var y = d3.scale.linear()
+	var yScale = d3.scale.linear()
 		.domain([-20, 20]) //default, is changed in callback
 		.range([200, 0]);
 
 	var yAxis = d3.svg.axis()
-		.scale(y)
+		.scale(yScale)
 		.orient("left")
 		.ticks(10, "");
+		
+/******************************
+Update functions
+******************************/	
+//Function that switches Unit Pre Post
+
+//Buttons to switch between Unit, Pre-Post (4 conditions total)
+var buttons = [];
+var buttonNames = ["Unit 2 Pre", "Unit 2 Post", "Unit 4 Pre", "Unit 4 Post"];
+
+for(var x = 0; x < buttonNames.length; x++){
+
+		var dy = x <= 1 ? 0 : 1;
+		var temp  = svg.append("g")
+		.attr("transform", "translate(" + 100*(x%2) + "," + buttonHeight*dy + ")");
+
+		temp.append("rect")
+			.data([{name: buttonNames[x]}])
+			.attr("class", "switch")
+			.attr("width", buttonWidth)
+			.attr("height", buttonHeight)
+		
+		temp.append("text")
+			.attr("class", "buttonText")
+			.attr("transform", "translate(" + buttonWidth/5 + "," + buttonHeight/1.5 + ")")
+			.text(buttonNames[x]);
+	
+		console.log(temp);
+		buttons[buttonNames[x]] = temp;
+}
 
 /******************************
 Map student data to graphs
@@ -104,7 +152,7 @@ Map student data to graphs
 				 .entries(data);
 
 			//alter the range for Y axis
-			y.domain(d3.extent(studentDataset, function(d) { return +d["Unit " + CURRENT_UNIT + " Learning Gain"];}));
+			yScale.domain(d3.extent(studentDataset, function(d) { return +d["Unit " + CURRENT_UNIT + " Learning Gain"];}));
 			
 			//Create a separate scale+axis for each parameter we care about
 			d3.selectAll(groups)
@@ -136,7 +184,6 @@ Map student data to graphs
 							.attr("transform", "translate(0," + graphHeight + ")")
 							.call(xAxis)
 						  .append("text")
-
 							  .style("text-anchor", "start")
 							  .text(graphParams[i]);
 					//Y Axis
@@ -159,7 +206,7 @@ Map student data to graphs
 										if(isNaN(gains) || isNaN(cat))
 											return "translate(0,0)";
 										else
-											return "translate(" + x(cat) + "," + y(+gains) + ")";
+											return "translate(" + x(cat) + "," + yScale(+gains) + ")";
 									})
 							.attr("opacity", function(d){ return (d["Unit " + CURRENT_UNIT + " Learning Gain"] == "null") ? 0 : 1;})
 							.attr("cy", 0)
@@ -217,11 +264,9 @@ d3.csv("problems2.csv", function(data){
 	d3.selectAll(groups)
 		.each(function(d2, k){ 
 			if(this.key == CURRENT_UNIT){
-				console.log(this);
 				//Map A and B separately for 4 groups of bars: A-correct, A-incorrect, B-correct, B-incorrect 
 				d3.selectAll(this.values)
 					.each(function(dat, j){
-						console.log(this);
 						var correctBars = barsholder.append("g")
 								.attr("class", "correctBars oneBarTypeHolder")
 								.attr("width", width)
