@@ -33,18 +33,30 @@
 			fill: #D5D8E4;
 		}
 		
-		.switch{
-			fill: lightgrey;
+		.switch.unpressed{
+			fill: #D3D3D3;
 		}
 		
+		.switch.pressed{
+			fill: #A8A8A8;
+			stroke: #494949;
+			stroke-width: 2;
+		}
+
+		
 		.switch:hover{
-			fill: grey;
+			fill: #808080;
 		}
 		
 		.buttonText{
 			pointer-events:none;
+			font-size: 10pt;
+            font-family: Verdana;
 		}
 		
+		.buttonHolder{
+			fill: #000000:
+		}
 		.axis {
             font-size: 10pt;
             font-family: Verdana;
@@ -66,7 +78,7 @@
 		.zero.axis{
 			stroke-dasharray: 1,2;
 			stroke-width: 1px;
-			stroke: gray;
+			stroke: #808080;
 		}
 		.tick {
 			font-size: 8pt;
@@ -108,6 +120,7 @@ Global(?) functions/variables - maybe put into their individual callbacks to pre
     //Default starting variables
     var CURRENT_UNIT = "2";
     var CURRENT_PREPOST= "Pre"; 
+    var CURRENT_BUTTON = null;
     
     //the main SVG
     var svg = d3.select("body").append("svg")
@@ -399,7 +412,24 @@ Buttons
 ******************************/	
 var buttons = [];
 var buttonNames = ["Unit 2 Pre", "Unit 2 Post", "Unit 4 Pre", "Unit 4 Post"];
+var shrinkConstant = 0.98;
 
+//Change size of an unpressed button
+function setUnpressedSize(){
+	this.attr("class", "switch unpressed")
+		.attr("width", buttonWidth)
+		.attr("height", buttonHeight)
+		.attr("transform", "translate(0,0)");
+}
+
+//Change size of a pressed button
+function setPressedSize(){
+	this.attr("class", "switch pressed")
+		.attr("width", buttonWidth*shrinkConstant)
+		.attr("height", buttonHeight*shrinkConstant)
+		.attr("transform", "translate(" + (buttonWidth-shrinkConstant*buttonWidth)/2 
+				+ "," + (buttonHeight-shrinkConstant*buttonHeight)/2 + ")");	
+}
 //Function that switches Unit Pre Post
 function switchCondition(e){
 	var pr = CURRENT_PREPOST;
@@ -424,22 +454,30 @@ function switchCondition(e){
 		break;
 	}
 	if(CURRENT_PREPOST != pr || CURRENT_UNIT != un){
-		console.log(CURRENT_PREPOST + " " + CURRENT_UNIT);
+		for(var x = 0; x < buttonNames.length; x++){
+			if (buttonNames[x] != e.name){
+				buttons[buttonNames[x]].select("rect").call(setUnpressedSize);
+			}
+			else{
+				buttons[buttonNames[x]].select("rect").call(setPressedSize);
+			}
+		}
 		drawDots();
 		drawProblemBars();
 	}
 }
-//Buttons to switch between Unit, Pre-Post (4 conditions total)
+//Make buttons to switch between Unit, Pre-Post (4 conditions total)
 for(var x = 0; x < buttonNames.length; x++){
 
 		var dy = x <= 1 ? 0 : 1;
 		var temp  = svg.append("g")
-		.attr("transform", "translate(" + 100*(x%2) + "," + buttonHeight*dy + ")");
+		.attr("class", "buttonHolder")
+		.attr("transform", "translate(" + (100+110*(x%2)) + "," + 1.5*buttonHeight*dy + ")");
 
 		var n = buttonNames[x];
 		temp.append("rect")
 			.data([{name: n}])
-			.attr("class", "switch")
+			.attr("class", "switch unpressed")
 			.attr("width", buttonWidth)
 			.attr("height", buttonHeight)
 			.on("click", function(e){switchCondition(e);});
@@ -451,6 +489,8 @@ for(var x = 0; x < buttonNames.length; x++){
 
 		buttons[n] = temp;
 }
+
+buttons[buttonNames[0]].select("rect").attr("class", "switch pressed");
 
 </script>
 </body>
