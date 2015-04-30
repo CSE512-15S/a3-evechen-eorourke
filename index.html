@@ -44,6 +44,25 @@
 		.buttonText{
 			pointer-events:none;
 		}
+		
+		.axis {
+            font-size: 10pt;
+            font-family: Verdana;
+            color: gray;
+            fill-opacity: .6;			
+        }
+
+		.axis path,
+		.axis line {
+			stroke: gray;
+			fill: none;
+			stroke-width: 1px;
+		}
+
+		.tick {
+			font-size: 8pt;
+		}
+		
 		svg{
 		}
 		</style>
@@ -93,9 +112,10 @@ Global(?) functions/variables - maybe put into their individual callbacks to pre
 		  .call(yAxis)
 		.append("text")
 		  .attr("transform", "rotate(-90)")
-		  .attr("y", 6)
-		  .attr("dy", ".71em")
-		  .style("text-anchor", "end")
+		  .attr("y", 0 - margin.left)
+		  .attr("x",0 - (graphHeight / 2))
+		  .attr("dy", "1.5em")
+		  .style("text-anchor", "middle")
 		  .text("Learning Gains");
     }
     
@@ -106,7 +126,9 @@ Global(?) functions/variables - maybe put into their individual callbacks to pre
 	var yAxis = d3.svg.axis()
 		.scale(yScale)
 		.orient("left")
-		.ticks(10, "");
+		.ticks(10, "")
+	
+	
 /******************************
 Map student data to graphs
 ******************************/	
@@ -196,15 +218,18 @@ function drawGraphs(){
 						//X Axis
 						var xAxis = d3.svg.axis()
 								.scale(x)
-								.orient("bottom");
+								.orient("bottom")
+								.ticks(5, "");
 			
 						holder.append("g")
 								.attr("class", graphParams[i] + " x axis")
 								.attr("transform", "translate(0," + graphHeight + ")")
 								.call(xAxis)
 							  .append("text")
-								  .style("text-anchor", "start")
+								  .attr("transform", "translate(" + (graphWidth / 2) + " ," + (margin.bottom-15) + ")")
+								  .style("text-anchor", "middle")
 								  .text(graphParams[i]);
+						
 						//Y Axis
 						addYAxis(holder);
 					});
@@ -216,6 +241,7 @@ function drawGraphs(){
 
 //initial loading
 drawGraphs();
+
 /********************************
 Map problem correctness data to bottom bar
 ********************************/
@@ -240,14 +266,15 @@ Map problem correctness data to bottom bar
 		
 	//Y Axis, percentage
 	barsholder.append("g")
-		  .attr("class", "barsYAxis")
+		  .attr("class", "axis")
 		  .call(barsYAxis)
 		.append("text")
 		  .attr("transform", "rotate(-90)")
-		  .attr("y", 6)
-		  .attr("dy", ".71em")
-		  .style("text-anchor", "end")
-		  .text("%");
+		  .attr("y", 0 - margin.left)
+		  .attr("x",0 - (problemSelectorHeight / 2))
+		  .attr("dy", "0.8em")
+		  .style("text-anchor", "middle")
+		  .text("% Correct");
 		  
 	//TODO clean this part up a bit? forloop + array for class names, maybe
 	//Holders for correct bars
