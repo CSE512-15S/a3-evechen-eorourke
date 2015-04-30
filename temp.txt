@@ -18,3 +18,11 @@ small multiples: tablet vs paper condition vs table+paper combined
 	- clicking multiple bars means must fulfill ALL conditions
 
 - future: maybe kids were doing a lot of easy problems
+
+4/30 possible issues
+- occlusion on graph
+- where should interaction area be for bars
+- how large to make graphs
+- buttons
+- label for problem bars (% correct isn't quite accurate)
+- button toggles to select all A, all B, all correct, all incorrect
