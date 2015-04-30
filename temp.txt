@@ -19,10 +19,38 @@ small multiples: tablet vs paper condition vs table+paper combined
 
 - future: maybe kids were doing a lot of easy problems
 
-4/30 possible issues
-- occlusion on graph
+4/30 Issues
+
+- occlusion on graph - changing dot sizes overlap shouldn't be happening much anyway bc looking at overall trends, if there is overlap it doesn't matter; also we can select just orange or just blue if that matters - maybe use outline vs filled circle?
+
+- buttons shadow styling - look for pretty SVG  buttons
 - where should interaction area be for bars
+ - try different sensitivities for sensitive areas
+	- black border on hover
+	- expand bar?
+	- dots under bars to show what is selected? - probably uniform 
+
 - how large to make graphs
-- buttons
+	- i.e. no longer care about conditions, show 6 graphs/ no longer care about A vs B
+	- maybe separate graphs into 2 groups, divided by the problem bars
+- keep bars horizontally aligned bc most screens are wider than taller
+	- bars can be thinner and closer together
+- do we care more about comparing A vs B tests or tablet vs paper? (not a priority for now) 
+	 
 - label for problem bars (% correct isn't quite accurate)
-- button toggles to select all A, all B, all correct, all incorrect
+	- Correctness vs correct
+
+- button toggles to select all A, all B, all correct, all incorrect 4 buttons
+
+- animations between switching units: animate all dots at a time for now, can change later
+
+- animate bars growing and shrinking between pre and post; animate bars fading in about between condition changes
+
+- meaningful captions later
+
+
+DONE 
+- black dots! get rid
+- EX - AP -> Exercise and Assessment
+- axes intersect at the wrong place - how to label?
+-  make axes stand out at the zeroes, lighter grey for label line, copy Tableau's dotted line and intersecting zeroes

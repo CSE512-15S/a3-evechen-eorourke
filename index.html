@@ -14,7 +14,7 @@
 		}
 		
 		.unknown.dot{
-			fill: #000000;
+			opacity: 0.0;
 		}
 		
 		.A.correctbar{
@@ -48,17 +48,26 @@
 		.axis {
             font-size: 10pt;
             font-family: Verdana;
-            color: gray;
+            color: #CCCCCC;
             fill-opacity: .6;			
         }
 
 		.axis path,
 		.axis line {
-			stroke: gray;
+			stroke: #CCCCCC;
 			fill: none;
 			stroke-width: 1px;
 		}
-
+		
+		.axis path.domain{
+			stroke-width: 0px;
+		}
+		
+		.zero.axis{
+			stroke-dasharray: 1,2;
+			stroke-width: 1px;
+			stroke: gray;
+		}
 		.tick {
 			font-size: 8pt;
 		}
@@ -106,7 +115,7 @@ Global(?) functions/variables - maybe put into their individual callbacks to pre
     .attr("height", height)
 
 	//y axis - should be the same for all graphs
-	function addYAxis(elem){
+	function addYAxis(elem, offset){
 		elem.append("g")
 		  .attr("class", "y axis")
 		  .call(yAxis)
@@ -133,36 +142,74 @@ Global(?) functions/variables - maybe put into their individual callbacks to pre
 Map student data to graphs
 ******************************/	
 function drawDots(){
-console.log("here");
+	//Alter the range for Y axis
+	var min = d3.min(studentDataset, function(d) { return +d["Unit " + CURRENT_UNIT + " Learning Gain"];})
+	var max = d3.max(studentDataset, function(d) { return +d["Unit " + CURRENT_UNIT + " Learning Gain"];})
+	var yDottedOffset = Math.abs(max - min) * 0.1;
+	yScale.domain([min-yDottedOffset, max]); //TODO make min like 10% less than actual min or something
+	
 	d3.selectAll(conditions)
 		.each(function(d2, j){ 
 		d3.selectAll(graphParams)
 			.each(function(d, i) {
-				
-				//TODO add graph stretch/shrink transitions		
+
 				//Current Graph Holder
 				var holder = svg.select(".graph" + i + ".type" + j + ".graphHolder");
+				holder.selectAll(".axis").remove();
 				
-				//X Scale
+				//X Scale and Axis
+				//TODO nonstatic offset for domain, based on actual data domain, maybe 10%?
+				min = d3.min(studentDataset, function(d) { return +d[graphParams[i]];})
+				max = d3.max(studentDataset, function(d) { return +d[graphParams[i]];})
+			    var xDottedOffset = Math.abs(max - min) * 0.1;
+				
 				var x = d3.scale.linear()
-						.domain([0, d3.max(studentDataset, function(d) { return +d[graphParams[i]];} )])
+						.domain([min-xDottedOffset, max])
 						.range(defaultRange);
+									
+				//X Axis
+				var xAxis = d3.svg.axis()
+						.scale(x)
+						.orient("bottom")
+						.ticks(5, "");
+			
+				holder.append("g")
+						.attr("class", "x axis")
+						.attr("transform", "translate(0," + graphHeight + ")")
+						.call(xAxis)
+					  .append("text")
+						  .attr("transform", "translate(" + (graphWidth / 2) + " ," + (margin.bottom-15) + ")")
+						  .style("text-anchor", "middle")
+						  .text(graphParams[i]);
 				
-				//Alter the range for Y axis
-				//TODO where to put the scaling so it isn't done 12 times?
-				yScale.domain(d3.extent(studentDataset, function(d) { return +d["Unit " + CURRENT_UNIT + " Learning Gain"];}));
-				
-				//Remove old Y axis, then add new one
-				holder.selectAll(".y.axis").remove();
-				addYAxis(holder);
+				//Y Axis
+				addYAxis(holder, yDottedOffset);
 								
+				//Dotted lines intersecting at 0
+					//Vertical Line
+					holder.append("line")
+							.attr("class", graphParams[i] + " zero axis")
+							.attr("x1", x(0))
+							.attr("y1", 0)
+							.attr("x2", x(0))
+							.attr("y2", graphHeight)
+					
+					//Horizontal Line
+					holder.append("line")
+							.attr("class", graphParams[i] + " zero axis")
+							.attr("x1", 0)
+							.attr("y1", yScale(0))
+							.attr("x2", graphWidth)
+							.attr("y2", yScale(0));
+														
+				//Redraw/Draw dots					
 				var dots = holder.selectAll("circle")
 					.data(conditions[j].values);
 														
 				dots.enter().append("circle")
 					.attr("cy", 0)
 					.attr("cx", 0)
-					.attr("r", 2);
+					.attr("r", 1.5);
 				
 				dots.attr("class", function(d) {
 							var t = d["Unit " + CURRENT_UNIT + " Pre-Test Type"].toUpperCase();
@@ -171,11 +218,13 @@ console.log("here");
 									t == "B";
 								else if(t == "B")
 									t == "A";
+								else
+									t == "unknown";
 							}
 							if(t == "A" || t == "B")
-							return t + " dot";
+								return t + " dot";
 							else
-							return "unknown dot";
+								return "unknown dot";
 						})
 					.attr("transform", function(d) { 
 								var gains = d["Unit " + CURRENT_UNIT + " Learning Gain"];
@@ -193,7 +242,7 @@ console.log("here");
 		});
 	});
 }
-//Call this once at beginning to set up axes and groups
+//Call this once at beginning to set up 
 function drawGraphs(){
 		d3.csv("students2.csv", function(data){
 
@@ -206,10 +255,6 @@ function drawGraphs(){
 					 .key(function(d) { return d.Condition; })
 					 .entries(data);
 
-				//alter the range for Y axis
-				yScale.domain(d3.extent(studentDataset, function(d) { return +d["Unit " + CURRENT_UNIT + " Learning Gain"];}));
-			
-				//Create a separate scale+axis for each parameter we care about
 				d3.selectAll(conditions)
 					.each(function(d2, j){ 
 						d3.selectAll(graphParams)
@@ -223,31 +268,10 @@ function drawGraphs(){
 							.attr("width", graphWidth)
 							.attr("height", graphHeight)
 							.attr("transform", "translate(" + holderX + "," + holderY + ")");
-					
-					//X Scale
-					var x = d3.scale.linear()
-							.domain([0, d3.max(studentDataset, function(d) { return +d[graphParams[i]];} )])
-							.range(defaultRange);
-										
-					//X Axis
-					var xAxis = d3.svg.axis()
-							.scale(x)
-							.orient("bottom")
-							.ticks(5, "");
-				
-					holder.append("g")
-							.attr("class", graphParams[i] + " x axis")
-							.attr("transform", "translate(0," + graphHeight + ")")
-							.call(xAxis)
-						  .append("text")
-							  .attr("transform", "translate(" + (graphWidth / 2) + " ," + (margin.bottom-15) + ")")
-							  .style("text-anchor", "middle")
-							  .text(graphParams[i]);
-					});
-			});	
-		drawDots();
+				});	
+			drawDots();
+		});
 	});
-
 }
 
 //initial loading
