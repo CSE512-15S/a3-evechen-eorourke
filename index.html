@@ -138,45 +138,58 @@ console.log("here");
 		.each(function(d2, j){ 
 		d3.selectAll(graphParams)
 			.each(function(d, i) {
-			//X Scale
-			var x = d3.scale.linear()
-					.domain([0, d3.max(studentDataset, function(d) { return +d[graphParams[i]];} )])
-					.range(defaultRange);
+				
+				//TODO add graph stretch/shrink transitions		
+				//Current Graph Holder
+				var holder = svg.select(".graph" + i + ".type" + j + ".graphHolder");
+				
+				//X Scale
+				var x = d3.scale.linear()
+						.domain([0, d3.max(studentDataset, function(d) { return +d[graphParams[i]];} )])
+						.range(defaultRange);
+				
+				//Alter the range for Y axis
+				//TODO where to put the scaling so it isn't done 12 times?
+				yScale.domain(d3.extent(studentDataset, function(d) { return +d["Unit " + CURRENT_UNIT + " Learning Gain"];}));
+				
+				//Remove old Y axis, then add new one
+				holder.selectAll(".y.axis").remove();
+				addYAxis(holder);
 								
-			var dots = svg.select(".graph" + i + ".type" + j + ".graphHolder").selectAll("circle")
-				.data(conditions[j].values);
+				var dots = holder.selectAll("circle")
+					.data(conditions[j].values);
 														
-			dots.enter().append("circle")
-				.attr("cy", 0)
-				.attr("cx", 0)
-				.attr("r", 2);
+				dots.enter().append("circle")
+					.attr("cy", 0)
+					.attr("cx", 0)
+					.attr("r", 2);
 				
-			dots.attr("class", function(d) {
-						var t = d["Unit " + CURRENT_UNIT + " Pre-Test Type"].toUpperCase();
-						if(CURRENT_PREPOST == "Post"){
-							if(t == "A")
-								t == "B";
-							else if(t == "B")
-								t == "A";
-						}
-						if(t == "A" || t == "B")
-						return t + " dot";
-						else
-						return "unknown dot";
-					})
-				.attr("transform", function(d) { 
-							var gains = d["Unit 2 Learning Gain"];
-							var cat = +d[graphParams[i]];
-				
-							if(isNaN(gains) || isNaN(cat))
-								return "translate(0,0)";
+				dots.attr("class", function(d) {
+							var t = d["Unit " + CURRENT_UNIT + " Pre-Test Type"].toUpperCase();
+							if(CURRENT_PREPOST == "Post"){
+								if(t == "A")
+									t == "B";
+								else if(t == "B")
+									t == "A";
+							}
+							if(t == "A" || t == "B")
+							return t + " dot";
 							else
-								return "translate(" + x(cat) + "," + yScale(+gains) + ")";
+							return "unknown dot";
 						})
-				.attr("opacity", function(d){ return (d["Unit " + CURRENT_UNIT + " Learning Gain"] == "null") ? 0 : 1;})
+					.attr("transform", function(d) { 
+								var gains = d["Unit " + CURRENT_UNIT + " Learning Gain"];
+								var cat = +d[graphParams[i]];
+				
+								if(isNaN(gains) || isNaN(cat))
+									return "translate(0,0)";
+								else
+									return "translate(" + x(cat) + "," + yScale(+gains) + ")";
+							})
+					.attr("opacity", function(d){ return isNaN(d["Unit " + CURRENT_UNIT + " Learning Gain"]) ? 0 : 1;})
 
-			dots.exit()
-				.remove();
+				dots.exit()
+					.remove();
 		});
 	});
 }
@@ -210,28 +223,26 @@ function drawGraphs(){
 							.attr("width", graphWidth)
 							.attr("height", graphHeight)
 							.attr("transform", "translate(" + holderX + "," + holderY + ")");
-						//X Scale
-						var x = d3.scale.linear()
-								.domain([0, d3.max(studentDataset, function(d) { return +d[graphParams[i]];} )])
-								.range(defaultRange);
+					
+					//X Scale
+					var x = d3.scale.linear()
+							.domain([0, d3.max(studentDataset, function(d) { return +d[graphParams[i]];} )])
+							.range(defaultRange);
 										
-						//X Axis
-						var xAxis = d3.svg.axis()
-								.scale(x)
-								.orient("bottom")
-								.ticks(5, "");
-			
-						holder.append("g")
-								.attr("class", graphParams[i] + " x axis")
-								.attr("transform", "translate(0," + graphHeight + ")")
-								.call(xAxis)
-							  .append("text")
-								  .attr("transform", "translate(" + (graphWidth / 2) + " ," + (margin.bottom-15) + ")")
-								  .style("text-anchor", "middle")
-								  .text(graphParams[i]);
-						
-						//Y Axis
-						addYAxis(holder);
+					//X Axis
+					var xAxis = d3.svg.axis()
+							.scale(x)
+							.orient("bottom")
+							.ticks(5, "");
+				
+					holder.append("g")
+							.attr("class", graphParams[i] + " x axis")
+							.attr("transform", "translate(0," + graphHeight + ")")
+							.call(xAxis)
+						  .append("text")
+							  .attr("transform", "translate(" + (graphWidth / 2) + " ," + (margin.bottom-15) + ")")
+							  .style("text-anchor", "middle")
+							  .text(graphParams[i]);
 					});
 			});	
 		drawDots();
