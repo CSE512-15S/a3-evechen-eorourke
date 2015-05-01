@@ -17,24 +17,38 @@
 			opacity: 0.0;
 		}
 		
-		.A.correctbar{
+		.bar{
+			stroke-width: 2;
+		}
+
+		rect.bar:hover{
+			stroke: black;
+		}
+
+		.A.correct{
 			fill: #FFA500;
+			stroke: #FFA500;
 		}
 		
-		.B.correctbar{
+		.B.correct{
 			fill: #4169E1;
+			stroke: #4169E1;
 		}
 		
-		.A.incorrectbar{
+		.A.incorrect{
 			fill: #DFCBA6;
+			stroke: #DFCBA6;
 		}
 		
-		.B.incorrectbar{
+		.B.incorrect{
 			fill: #D5D8E4;
+			stroke: #D5D8E4;
 		}
-		
+				
 		.switch.unpressed{
 			fill: #D3D3D3;
+			stroke: #D3D3D3;
+			stroke-width: 2;
 		}
 		
 		.switch.pressed{
@@ -46,6 +60,7 @@
 		
 		.switch:hover{
 			fill: #808080;
+			stroke: #808080;
 		}
 		
 		.buttonText{
@@ -105,6 +120,7 @@ var defaultRange = [0, graphWidth]; //for visual mapping, so should be same for 
 
 var barWidth = 15;
 var barMargin = {top: 10, right: 10, bottom: 10, left: 10};
+var barStrokeWidth = 2;
 
 var buttonHeight = 20, 
 	buttonWidth = 100;
@@ -305,7 +321,7 @@ Map problem correctness data to bottom bar
     //TODO alter the range based on actual learning gains range?
 	var barsY = d3.scale.linear()
 		.domain([0, 1])
-		.range([100, 0]); 
+		.range([100+barStrokeWidth, 0]); 
 
 	var barsYAxis = d3.svg.axis()
 		.scale(barsY)
@@ -352,6 +368,10 @@ function drawProblemBars(){
 d3.csv("problems2.csv", function(data){
 		problemsDataset = data.map(function(d){return d;});
 	
+	//TODO create a wrapper for each bar that is its mouseover area
+	//.data([{selected: false}]) to store info about whether it is pressed or not
+	//add interactivity to bars 
+
 		//Nest by Unit
 		var groups = d3.nest()
 			 .key(function(d) { return d.Unit; })
@@ -376,11 +396,11 @@ d3.csv("problems2.csv", function(data){
 							correctBars.enter()
 									.append("rect");
 							correctBars
-									  .attr("class", function(d) { return d.Type + " correctbar";})
-									  .attr("x", function(d, i) { return (j*barWidth)+i*((graphWidth/4)); })
+									  .attr("class", this.key + " correct bar")
+									  .attr("x", function(d, i) { return (j*(barStrokeWidth + barWidth))+i*((graphWidth/4)); })
 									  .attr("width", barWidth)
 									  .attr("y", function(d){ return barsY(+d[corr]/(+d[corr]+(+d[incorr])));})
-									  .attr("height", function(d) {return problemSelectorHeight - barsY(+d[corr]/(+d[corr]+(+d[incorr]))); });	
+									  .attr("height", function(d) {return barStrokeWidth + problemSelectorHeight - barsY(+d[corr]/(+d[corr]+(+d[incorr]))); });	
 							correctBars.exit()
 									.remove();
 
@@ -392,8 +412,8 @@ d3.csv("problems2.csv", function(data){
 									  .attr("width", barWidth)
 									  .attr("y", 0)
 							incorrectBars
-								.attr("class", function(d) { return d.Type + " incorrectbar";})
-								.attr("x", function(d, i) { return (j*barWidth)+i*((graphWidth/4)); })
+								.attr("class", this.key + " incorrect bar")
+								.attr("x", function(d, i) { return (j*(barStrokeWidth + barWidth))+i*((graphWidth/4)); })
 								.attr("height", function(d) { return problemSelectorHeight - barsY(+d[incorr]/(+d[corr]+(+d[incorr]))); });
 							incorrectBars.exit()
 									.remove();		
@@ -416,19 +436,12 @@ var shrinkConstant = 0.98;
 
 //Change size of an unpressed button
 function setUnpressedSize(){
-	this.attr("class", "switch unpressed")
-		.attr("width", buttonWidth)
-		.attr("height", buttonHeight)
-		.attr("transform", "translate(0,0)");
+	this.attr("class", "switch unpressed");
 }
 
 //Change size of a pressed button
 function setPressedSize(){
-	this.attr("class", "switch pressed")
-		.attr("width", buttonWidth*shrinkConstant)
-		.attr("height", buttonHeight*shrinkConstant)
-		.attr("transform", "translate(" + (buttonWidth-shrinkConstant*buttonWidth)/2 
-				+ "," + (buttonHeight-shrinkConstant*buttonHeight)/2 + ")");	
+	this.attr("class", "switch pressed");	
 }
 //Function that switches Unit Pre Post
 function switchCondition(e){
