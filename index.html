@@ -116,18 +116,19 @@
 <body>
 <script>
 /******************************************
-Layout and appearance variables 
+ * Layout and appearance variables 
  ******************************************/
 var graphHeight = 200, 
 	graphWidth = 200;
 var problemSelectorHeight = 100;
 var margin = {top: 50, right: 50, bottom: 50, left: 50};
-var width = (7*graphWidth) + (8*margin.left), 
+var width = (10*graphWidth) + (8*margin.left), 
 	height = (2*graphHeight) + (3*margin.top) + 2*problemSelectorHeight;
 
 var defaultRange = [0, graphWidth]; //for visual mapping, so should be same for all graphs?
 
-var barWidth = 15;
+var barWidth = 10;
+var barSpacing = (barWidth*2) + 20;
 var barMargin = {top: 10, right: 10, bottom: 10, left: 10};
 var barStrokeWidth = 2;
 var barHitVert = 10; //extra hit area padding for top or bottom
@@ -135,8 +136,9 @@ var barHitHor = 10; //extra hit area padding for left or right
 
 var buttonHeight = 20, 
 	buttonWidth = 100;
+	
 /******************************************
-Global(?) functions/variables - maybe put into their individual callbacks to prevent accidentally overwriting axes/scale info
+ * Global(?) functions/variables - maybe put into their individual callbacks to prevent accidentally overwriting axes/scale info
  ******************************************/
  	//Holds data from CSV files
  	var conditions = [];
@@ -176,11 +178,11 @@ Global(?) functions/variables - maybe put into their individual callbacks to pre
 		.scale(yScale)
 		.orient("left")
 		.ticks(10, "")
-	
-	
+
+
 /******************************
-Map student data to graphs
-******************************/	
+ * Map student data to graphs
+ ******************************/	
 function drawDots(){
 	//Alter the range for Y axis
 	var min = d3.min(studentDataset, function(d) { return +d["Unit " + CURRENT_UNIT + " Learning Gain"];})
@@ -188,129 +190,127 @@ function drawDots(){
 	var yDottedOffset = Math.abs(max - min) * 0.1;
 	yScale.domain([min-yDottedOffset, max]); //TODO make min like 10% less than actual min or something
 	
-	d3.selectAll(conditions)
-		.each(function(d2, j){ 
-		d3.selectAll(graphParams)
-			.each(function(d, i) {
-
-				//Current Graph Holder
-				var holder = svg.select(".graph" + i + ".type" + j + ".graphHolder");
-				holder.selectAll(".axis").remove();
-				
-				//X Scale and Axis
-				//TODO nonstatic offset for domain, based on actual data domain, maybe 10%?
-				min = d3.min(studentDataset, function(d) { return +d[graphParams[i]];})
-				max = d3.max(studentDataset, function(d) { return +d[graphParams[i]];})
-			    var xDottedOffset = Math.abs(max - min) * 0.1;
-				
-				var x = d3.scale.linear()
-						.domain([min-xDottedOffset, max])
-						.range(defaultRange);
-									
-				//X Axis
-				var xAxis = d3.svg.axis()
-						.scale(x)
-						.orient("bottom")
-						.ticks(5, "");
+	console.log("finished scaling");
+	d3.selectAll(graphParams)
+		.each(function(d, i) {
+			//Current Graph Holder
+			var holder = svg.select(".graph" + i + ".graphHolder");
+			holder.selectAll(".axis").remove();
 			
-				holder.append("g")
-						.attr("class", "x axis")
-						.attr("transform", "translate(0," + graphHeight + ")")
-						.call(xAxis)
-					  .append("text")
-						  .attr("transform", "translate(" + (graphWidth / 2) + " ," + (margin.bottom-15) + ")")
-						  .style("text-anchor", "middle")
-						  .text(graphParams[i]);
-				
-				//Y Axis
-				addYAxis(holder, yDottedOffset);
-								
-				//Dotted lines intersecting at 0
-					//Vertical Line
-					holder.append("line")
-							.attr("class", graphParams[i] + " zero axis")
-							.attr("x1", x(0))
-							.attr("y1", 0)
-							.attr("x2", x(0))
-							.attr("y2", graphHeight)
+			//X Scale and Axis
+			//TODO nonstatic offset for domain, based on actual data domain, maybe 10%?
+			min = d3.min(studentDataset, function(d) { return +d[graphParams[i]];})
+			max = d3.max(studentDataset, function(d) { return +d[graphParams[i]];})
+		    var xDottedOffset = Math.abs(max - min) * 0.1;
+			
+			var x = d3.scale.linear()
+					.domain([min-xDottedOffset, max])
+					.range(defaultRange);
+							
+			//X Axis
+			var xAxis = d3.svg.axis()
+					.scale(x)
+					.orient("bottom")
+					.ticks(5, "");
+			
+			holder.append("g")
+					.attr("class", "x axis")
+					.attr("transform", "translate(0," + graphHeight + ")")
+					.call(xAxis)
+				  .append("text")
+					  .attr("transform", "translate(" + (graphWidth / 2) + " ," + (margin.bottom-15) + ")")
+					  .style("text-anchor", "middle")
+					  .text(graphParams[i]);
+			
+			//Y Axis
+			addYAxis(holder, yDottedOffset);
 					
-					//Horizontal Line
-					holder.append("line")
-							.attr("class", graphParams[i] + " zero axis")
-							.attr("x1", 0)
-							.attr("y1", yScale(0))
-							.attr("x2", graphWidth)
-							.attr("y2", yScale(0));
-														
-				//Redraw/Draw dots					
-				var dots = holder.selectAll("circle")
-					.data(conditions[j].values);
-														
-				dots.enter().append("circle")
-					.attr("cy", 0)
-					.attr("cx", 0)
-					.attr("r", 1.5);
-				
-				dots.attr("class", function(d) {
-							var t = d["Unit " + CURRENT_UNIT + " Pre-Test Type"].toUpperCase();
-							if(CURRENT_PREPOST == "Post"){
-								if(t == "A")
-									t == "B";
-								else if(t == "B")
-									t == "A";
-								else
-									t == "unknown";
-							}
-							if(t == "A" || t == "B")
-								return t + " dot";
+			//Dotted lines intersecting at 0
+			//Vertical Line
+			holder.append("line")
+					.attr("class", graphParams[i] + " zero axis")
+					.attr("x1", x(0))
+					.attr("y1", 0)
+					.attr("x2", x(0))
+					.attr("y2", graphHeight)
+			
+			//Horizontal Line
+			holder.append("line")
+					.attr("class", graphParams[i] + " zero axis")
+					.attr("x1", 0)
+					.attr("y1", yScale(0))
+					.attr("x2", graphWidth)
+					.attr("y2", yScale(0));
+										
+			//Redraw/Draw dots					
+			var dots = holder.selectAll("circle")
+				.data(studentDataset);
+													
+			dots.enter().append("circle")
+				.attr("cy", 0)
+				.attr("cx", 0)
+				.attr("r", 1.5);
+			
+			dots.attr("class", function(d) {
+						var t = d["Unit " + CURRENT_UNIT + " Pre-Test Type"].toUpperCase();
+						if(CURRENT_PREPOST == "Post"){
+							if(t == "A")
+								t == "B";
+							else if(t == "B")
+								t == "A";
 							else
-								return "unknown dot";
+								t == "unknown";
+						}
+						if(t == "A" || t == "B")
+							return t + " dot";
+						else
+							return "unknown dot";
+					})
+				.attr("transform", function(d) { 
+							var gains = d["Unit " + CURRENT_UNIT + " Learning Gain"];
+							var cat = +d[graphParams[i]];
+			
+							if(isNaN(gains) || isNaN(cat))
+								return "translate(0,0)";
+							else
+								return "translate(" + x(cat) + "," + yScale(+gains) + ")";
 						})
-					.attr("transform", function(d) { 
-								var gains = d["Unit " + CURRENT_UNIT + " Learning Gain"];
-								var cat = +d[graphParams[i]];
-				
-								if(isNaN(gains) || isNaN(cat))
-									return "translate(0,0)";
-								else
-									return "translate(" + x(cat) + "," + yScale(+gains) + ")";
-							})
-					.attr("opacity", function(d){ return isNaN(d["Unit " + CURRENT_UNIT + " Learning Gain"]) ? 0 : 1;})
-
-				dots.exit()
-					.remove();
-		});
+				.attr("opacity", function(d){ return isNaN(d["Unit " + CURRENT_UNIT + " Learning Gain"]) ? 0 : 1;})
+			
+			dots.exit()
+				.remove();
 	});
 }
-//Call this once at beginning to set up 
-function drawGraphs(){
-		d3.csv("students2.csv", function(data){
 
-				//Assign loaded data to variables
-				studentDataset = data.map(function(d){return d;});
-				graphParams = d3.keys(data[0]).slice(14, 20); //only select the 6 parameters we want to make graphs for
-			
-				//Nest by condition (tablet, paper)
-				conditions = d3.nest()
-					 .key(function(d) { return d.Condition; })
-					 .entries(data);
+// version that does not nest by condition
+function drawGraphs() {
+	d3.csv("students2.csv", function(data){
+		
+		//Assign loaded data to variables
+		studentDataset = data.map(function(d){return d;});
+		graphParams = d3.keys(data[0]).slice(14, 20); //only select the 6 parameters we want to make graphs for
 
-				d3.selectAll(conditions)
-					.each(function(d2, j){ 
-						d3.selectAll(graphParams)
-						.each(function(d, i) {
-					
-						//Container
-						var holderX = margin.left+i*(graphWidth+2*margin.left);
-						var holderY = j*(graphHeight+margin.top)+margin.top;
-						var holder = svg.append("g")
-							.attr("class", " graph" + i + " type" + j + " graphHolder")
-							.attr("width", graphWidth)
-							.attr("height", graphHeight)
-							.attr("transform", "translate(" + holderX + "," + holderY + ")");
-				});	
-			drawDots();
-		});
+		d3.selectAll(graphParams)
+			.each(function(d, i) {		
+				// Create the graph container
+				var colNum = i;
+				var rowNum = 0;
+				if (i > 2) {
+					colNum = i - 3;
+					rowNum = 1;
+				}
+				console.log("colNum: " + colNum + " rowNum: " + rowNum)
+				var holderX = margin.left + colNum*(graphWidth+2*margin.left);
+				var holderY = margin.top - 30 + rowNum*(graphHeight+margin.top+20);
+				console.log("holderX: " + holderX + " holderY: " + holderY);
+				var holder = svg.append("g")
+					.attr("class", " graph" + i + " graphHolder")
+					.attr("width", graphWidth)
+					.attr("height", graphHeight)
+					.attr("transform", "translate(" + holderX + "," + holderY + ")");
+			});
+		
+		drawDots();
 	});
 }
 
@@ -412,7 +412,7 @@ d3.csv("problems2.csv", function(data){
 							.append("rect")
                             .data(this.values)
 									  .attr("class", " hitArea")
-                                      .attr("x", function(d, i) { return (-1*barHitHor + j*barHitHor) + (j*(barStrokeWidth + barWidth))+i*((graphWidth/3)); })
+                                      .attr("x", function(d, i) { return (-1*barHitHor + j*barHitHor) + (j*(barStrokeWidth + barWidth))+i*(barSpacing); })
                                       .attr("y", function(d){ return barsY(+d[corr]/(+d[corr]+(+d[incorr])));})
 									  .attr("width", barWidth + barHitHor)
 									  .attr("height", function(d) {return barHitVert + barStrokeWidth + problemSelectorHeight - barsY(+d[corr]/(+d[corr]+(+d[incorr]))); });                                     
@@ -420,7 +420,7 @@ d3.csv("problems2.csv", function(data){
 							.append("rect")
                             .data(this.values)
 									  .attr("class", this.key + " correct bar")
-									  .attr("x", function(d, i) { return (j*(barStrokeWidth + barWidth))+i*((graphWidth/3)); })
+									  .attr("x", function(d, i) { return (j*(barStrokeWidth + barWidth))+i*(barSpacing); })
 									  .attr("width", barWidth)
 									  .attr("y", function(d){ return barsY(+d[corr]/(+d[corr]+(+d[incorr])));})
 									  .attr("height", function(d) {return barStrokeWidth + problemSelectorHeight - barsY(+d[corr]/(+d[corr]+(+d[incorr]))); });	
@@ -437,7 +437,7 @@ d3.csv("problems2.csv", function(data){
 							.append("rect")
                             .data(this.values)
                               .attr("class", " hitArea")
-                              .attr("x", function(d, i) { return (-1*barHitHor + j*barHitHor) + (j*(barStrokeWidth + barWidth))+i*((graphWidth/3)); })
+                              .attr("x", function(d, i) { return (-1*barHitHor + j*barHitHor) + (j*(barStrokeWidth + barWidth))+i*(barSpacing); })
                               .attr("y", -1*barHitVert)
                               .attr("width", barWidth + barHitHor)
                               .attr("height", function(d) {return barHitVert + Math.max(0, problemSelectorHeight - barsY(+d[incorr]/(+d[corr]+(+d[incorr])))); });                                     
@@ -445,7 +445,7 @@ d3.csv("problems2.csv", function(data){
 							.append("rect")
                             .data(this.values)
 								.attr("class", this.key + " incorrect bar")
-								.attr("x", function(d, i) { return (j*(barStrokeWidth + barWidth))+i*((graphWidth/3)); })
+								.attr("x", function(d, i) { return (j*(barStrokeWidth + barWidth))+i*(barSpacing); })
                                 .attr("width", barWidth)
 								.attr("y", 0)
 								.attr("height", function(d) { return Math.max(0, problemSelectorHeight - barsY(+d[incorr]/(+d[corr]+(+d[incorr])))); });                      
@@ -520,7 +520,7 @@ for(var x = 0; x < buttonNames.length; x++){
 		var dy = x <= 1 ? 0 : 1;
 		var temp  = svg.append("g")
 		.attr("class", "buttonHolder")
-		.attr("transform", "translate(" + (100+110*(x%2)) + "," + 1.5*buttonHeight*dy + ")");
+		.attr("transform", "translate(" + (900+110*(x%2)) + "," + 1.5*buttonHeight*dy + ")");
 
 		var n = buttonNames[x];
 		temp.append("rect")
