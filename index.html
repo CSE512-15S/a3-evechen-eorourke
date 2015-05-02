@@ -20,7 +20,16 @@
 		.bar{
 			stroke-width: 2;
 		}
+        
+        .hitArea{
+            fill:none;
+            pointer-events: all;
+        }
 
+        .hitArea:hover + rect{
+            stroke: black;
+        }
+        
 		rect.bar:hover{
 			stroke: black;
 		}
@@ -58,7 +67,7 @@
 		}
 
 		
-		.switch:hover{
+		.switch.unpressed:hover{
 			fill: #808080;
 			stroke: #808080;
 		}
@@ -121,6 +130,8 @@ var defaultRange = [0, graphWidth]; //for visual mapping, so should be same for 
 var barWidth = 15;
 var barMargin = {top: 10, right: 10, bottom: 10, left: 10};
 var barStrokeWidth = 2;
+var barHitVert = 10; //extra hit area padding for top or bottom
+var barHitHor = 10; //extra hit area padding for left or right
 
 var buttonHeight = 20, 
 	buttonWidth = 100;
@@ -386,35 +397,59 @@ d3.csv("problems2.csv", function(data){
 					d3.selectAll(this.values)
 						.each(function(dat, j){
 
-							//simplify selection for pre/post
-							var corr = CURRENT_PREPOST + " Correct";
-							var incorr = CURRENT_PREPOST + " Incorrect";
+                        //TODO bars with 0 values look really weird
+                        //simplify selection for pre/post
+                        var corr = CURRENT_PREPOST + " Correct";
+                        var incorr = CURRENT_PREPOST + " Incorrect";
 
-							var correctBars = barsholder.select(".correctBars" + this.key)
-									.selectAll("rect")
-										.data(this.values);												
-							correctBars.enter()
-									.append("rect");
-							correctBars
+                        var correctBars = barsholder.select(".correctBars" + this.key)
+                                .selectAll("g")
+                                    .data(this.values);
+                        correctBars.enter().append("g");
+                        
+                        //must draw hitArea before actual bar for CSS next sibling selector to work            
+  						correctBars
+							.append("rect")
+                            .data(this.values)
+									  .attr("class", " hitArea")
+                                      .attr("x", function(d, i) { return (-1*barHitHor + j*barHitHor) + (j*(barStrokeWidth + barWidth))+i*((graphWidth/3)); })
+                                      .attr("y", function(d){ return barsY(+d[corr]/(+d[corr]+(+d[incorr])));})
+									  .attr("width", barWidth + barHitHor)
+									  .attr("height", function(d) {return barHitVert + barStrokeWidth + problemSelectorHeight - barsY(+d[corr]/(+d[corr]+(+d[incorr]))); });                                     
+						correctBars
+							.append("rect")
+                            .data(this.values)
 									  .attr("class", this.key + " correct bar")
-									  .attr("x", function(d, i) { return (j*(barStrokeWidth + barWidth))+i*((graphWidth/4)); })
+									  .attr("x", function(d, i) { return (j*(barStrokeWidth + barWidth))+i*((graphWidth/3)); })
 									  .attr("width", barWidth)
 									  .attr("y", function(d){ return barsY(+d[corr]/(+d[corr]+(+d[incorr])));})
 									  .attr("height", function(d) {return barStrokeWidth + problemSelectorHeight - barsY(+d[corr]/(+d[corr]+(+d[incorr]))); });	
-							correctBars.exit()
-									.remove();
+     
+						correctBars.exit().remove();
 
-							var incorrectBars = barsholder.select(".incorrectBars" + this.key)
-									.selectAll("rect")
-										.data(this.values);			
-							incorrectBars.enter()
-									.append("rect")
-									  .attr("width", barWidth)
-									  .attr("y", 0)
-							incorrectBars
+                        var incorrectBars = barsholder.select(".incorrectBars" + this.key)
+                                .selectAll("g")
+                                    .data(this.values);
+                        incorrectBars.enter().append("g");
+
+                        //must draw hitArea before actual bar for CSS next sibling selector to work            
+  						incorrectBars
+							.append("rect")
+                            .data(this.values)
+                              .attr("class", " hitArea")
+                              .attr("x", function(d, i) { return (-1*barHitHor + j*barHitHor) + (j*(barStrokeWidth + barWidth))+i*((graphWidth/3)); })
+                              .attr("y", -1*barHitVert)
+                              .attr("width", barWidth + barHitHor)
+                              .attr("height", function(d) {return barHitVert + Math.max(0, problemSelectorHeight - barsY(+d[incorr]/(+d[corr]+(+d[incorr])))); });                                     
+						incorrectBars
+							.append("rect")
+                            .data(this.values)
 								.attr("class", this.key + " incorrect bar")
-								.attr("x", function(d, i) { return (j*(barStrokeWidth + barWidth))+i*((graphWidth/4)); })
-								.attr("height", function(d) { return problemSelectorHeight - barsY(+d[incorr]/(+d[corr]+(+d[incorr]))); });
+								.attr("x", function(d, i) { return (j*(barStrokeWidth + barWidth))+i*((graphWidth/3)); })
+                                .attr("width", barWidth)
+								.attr("y", 0)
+								.attr("height", function(d) { return Math.max(0, problemSelectorHeight - barsY(+d[incorr]/(+d[corr]+(+d[incorr])))); });                      
+                                
 							incorrectBars.exit()
 									.remove();		
 					   });
