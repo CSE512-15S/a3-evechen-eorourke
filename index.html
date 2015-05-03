@@ -377,36 +377,36 @@ Map problem correctness data to bottom bar
 //TODO separate out drawing the gridlines and the bars like I did for the dots
 function drawProblemBars(){    
 d3.csv("problems2.csv", function(data){
-		problemsDataset = data.map(function(d){return d;});
-	
+	problemsDataset = data.map(function(d){return d;});
+
 	//TODO create a wrapper for each bar that is its mouseover area
 	//.data([{selected: false}]) to store info about whether it is pressed or not
 	//add interactivity to bars 
 
-		//Nest by Unit
-		var groups = d3.nest()
-			 .key(function(d) { return d.Unit; })
-			 .key(function(d) { return d.Type; })
-			 .entries(data);
-	
-		//Select all rows of current unit
-		d3.selectAll(groups)
-			.each(function(d2, k){ 
-				if(this.key == CURRENT_UNIT){
-					//Map A and B separately for 4 groups of bars: A-correct, A-incorrect, B-correct, B-incorrect 
-					d3.selectAll(this.values)
-						.each(function(dat, j){
+	//Nest by Unit
+	var groups = d3.nest()
+		 .key(function(d) { return d.Unit; })
+		 .key(function(d) { return d.Type; })
+		 .entries(data);
 
-                        //TODO bars with 0 values look really weird
+	//Select all rows of current unit
+	d3.selectAll(groups)
+		.each(function(d2, k){ 
+			if(this.key == CURRENT_UNIT){
+				//Map A and B separately for 4 groups of bars: A-correct, A-incorrect, B-correct, B-incorrect 
+				d3.selectAll(this.values)
+					.each(function(dat, j) {
+
+                       	//TODO bars with 0 values look really weird
                         //simplify selection for pre/post
                         var corr = CURRENT_PREPOST + " Correct";
                         var incorr = CURRENT_PREPOST + " Incorrect";
 
                         var correctBars = barsholder.select(".correctBars" + this.key)
                                 .selectAll("g")
-                                    .data(this.values);
+                                .data(this.values);
                         correctBars.enter().append("g");
-                        
+                       
                         //must draw hitArea before actual bar for CSS next sibling selector to work            
   						correctBars
 							.append("rect")
@@ -424,12 +424,12 @@ d3.csv("problems2.csv", function(data){
 									  .attr("width", barWidth)
 									  .attr("y", function(d){ return barsY(+d[corr]/(+d[corr]+(+d[incorr])));})
 									  .attr("height", function(d) {return barStrokeWidth + problemSelectorHeight - barsY(+d[corr]/(+d[corr]+(+d[incorr]))); });	
-     
+    
 						correctBars.exit().remove();
 
                         var incorrectBars = barsholder.select(".incorrectBars" + this.key)
                                 .selectAll("g")
-                                    .data(this.values);
+                                .data(this.values);
                         incorrectBars.enter().append("g");
 
                         //must draw hitArea before actual bar for CSS next sibling selector to work            
@@ -449,15 +449,12 @@ d3.csv("problems2.csv", function(data){
                                 .attr("width", barWidth)
 								.attr("y", 0)
 								.attr("height", function(d) { return Math.max(0, problemSelectorHeight - barsY(+d[incorr]/(+d[corr]+(+d[incorr])))); });                      
-                                
-							incorrectBars.exit()
-									.remove();		
-					   });
+                               
+						incorrectBars.exit().remove();		
+					});
 				}					
 			});		
-	
-	
-	});
+		});
 }
 drawProblemBars();
 
