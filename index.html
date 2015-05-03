@@ -403,52 +403,50 @@ d3.csv("problems2.csv", function(data){
                         var incorr = CURRENT_PREPOST + " Incorrect";
 
                         var correctBars = barsholder.select(".correctBars" + this.key)
-                                .selectAll("g")
+                                .selectAll("rect")
                                 .data(this.values);
-                        correctBars.enter().append("g");
+                        correctBars.enter().append("rect");
                        
                         //must draw hitArea before actual bar for CSS next sibling selector to work            
-  						correctBars
-							.append("rect")
-                            .data(this.values)
-									  .attr("class", " hitArea")
-                                      .attr("x", function(d, i) { return (-1*barHitHor + j*barHitHor) + (j*(barStrokeWidth + barWidth))+i*(barSpacing); })
-                                      .attr("y", function(d){ return barsY(+d[corr]/(+d[corr]+(+d[incorr])));})
-									  .attr("width", barWidth + barHitHor)
-									  .attr("height", function(d) {return barHitVert + barStrokeWidth + problemSelectorHeight - barsY(+d[corr]/(+d[corr]+(+d[incorr]))); });                                     
+						// correctBars
+						// 	.append("rect")
+						// 	.data(this.values)
+						// 		.attr("class", " hitArea")
+						// 		.attr("x", function(d, i) { return (-1*barHitHor + j*barHitHor) + (j*(barStrokeWidth + barWidth))+i*(barSpacing); })
+						// 		.attr("y", function(d){ return barsY(+d[corr]/(+d[corr]+(+d[incorr])));})
+						// 		.attr("width", barWidth + barHitHor)
+						// 		.attr("height", function(d) {return barHitVert + barStrokeWidth + problemSelectorHeight - barsY(+d[corr]/(+d[corr]+(+d[incorr]))); });                                     
+						
 						correctBars
-							.append("rect")
-                            .data(this.values)
-									  .attr("class", this.key + " correct bar")
-									  .attr("x", function(d, i) { return (j*(barStrokeWidth + barWidth))+i*(barSpacing); })
-									  .attr("width", barWidth)
-									  .attr("y", function(d){ return barsY(+d[corr]/(+d[corr]+(+d[incorr])));})
-									  .attr("height", function(d) {return barStrokeWidth + problemSelectorHeight - barsY(+d[corr]/(+d[corr]+(+d[incorr]))); });	
+							.attr("class", this.key + " correct bar")
+							.attr("x", function(d, i) { return (j*(barStrokeWidth + barWidth))+i*(barSpacing); })
+							.attr("width", barWidth)
+							.attr("y", function(d){ return barsY(+d[corr]/(+d[corr]+(+d[incorr])));})
+							.attr("height", function(d) {return barStrokeWidth + problemSelectorHeight - barsY(+d[corr]/(+d[corr]+(+d[incorr]))); });	
     
 						correctBars.exit().remove();
 
                         var incorrectBars = barsholder.select(".incorrectBars" + this.key)
-                                .selectAll("g")
+                                .selectAll("rect")
                                 .data(this.values);
-                        incorrectBars.enter().append("g");
+                        incorrectBars.enter().append("rect");
 
                         //must draw hitArea before actual bar for CSS next sibling selector to work            
-  						incorrectBars
-							.append("rect")
-                            .data(this.values)
-                              .attr("class", " hitArea")
-                              .attr("x", function(d, i) { return (-1*barHitHor + j*barHitHor) + (j*(barStrokeWidth + barWidth))+i*(barSpacing); })
-                              .attr("y", -1*barHitVert)
-                              .attr("width", barWidth + barHitHor)
-                              .attr("height", function(d) {return barHitVert + Math.max(0, problemSelectorHeight - barsY(+d[incorr]/(+d[corr]+(+d[incorr])))); });                                     
+						// incorrectBars
+						// 	.append("rect")
+						// 	.data(this.values)
+						// 		.attr("class", " hitArea")
+						// 		.attr("x", function(d, i) { return (-1*barHitHor + j*barHitHor) + (j*(barStrokeWidth + barWidth))+i*(barSpacing); })
+						// 		.attr("y", -1*barHitVert)
+						// 		.attr("width", barWidth + barHitHor)
+						// 		.attr("height", function(d) {return barHitVert + Math.max(0, problemSelectorHeight - barsY(+d[incorr]/(+d[corr]+(+d[incorr])))); });                                     
+						
 						incorrectBars
-							.append("rect")
-                            .data(this.values)
-								.attr("class", this.key + " incorrect bar")
-								.attr("x", function(d, i) { return (j*(barStrokeWidth + barWidth))+i*(barSpacing); })
-                                .attr("width", barWidth)
-								.attr("y", 0)
-								.attr("height", function(d) { return Math.max(0, problemSelectorHeight - barsY(+d[incorr]/(+d[corr]+(+d[incorr])))); });                      
+							.attr("class", this.key + " incorrect bar")
+							.attr("x", function(d, i) { return (j*(barStrokeWidth + barWidth))+i*(barSpacing); })
+							.attr("width", barWidth)
+							.attr("y", 0)
+							.attr("height", function(d) { return Math.max(0, problemSelectorHeight - barsY(+d[incorr]/(+d[corr]+(+d[incorr])))); });                      
                                
 						incorrectBars.exit().remove();		
 					});
