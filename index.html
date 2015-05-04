@@ -34,24 +34,48 @@
 			stroke: black;
 		}
 
-		.A.correct{
+		.A.correct.selected{
 			fill: #FFA500;
 			stroke: #FFA500;
 		}
 		
-		.B.correct{
+		.B.correct.selected{
 			fill: #4169E1;
 			stroke: #4169E1;
 		}
 		
-		.A.incorrect{
+		.A.incorrect.selected{
 			fill: #DFCBA6;
 			stroke: #DFCBA6;
 		}
 		
-		.B.incorrect{
+		.B.incorrect.selected{
 			fill: #D5D8E4;
 			stroke: #D5D8E4;
+		}
+		
+		.A.correct.unselected{
+			fill: #DDDDDD;
+			stroke: #999999;
+			stroke-width: 1;
+		}
+		
+		.B.correct.unselected{
+			fill: #DDDDDD;
+			stroke: #999999;
+			stroke-width: 1;
+		}
+		
+		.A.incorrect.unselected{
+			fill: #DDDDDD;
+			stroke: #999999;
+			stroke-width: 1;
+		}
+		
+		.B.incorrect.unselected{
+			fill: #DDDDDD;
+			stroke: #999999;
+			stroke-width: 1;
 		}
 				
 		.switch.unpressed{
@@ -133,6 +157,7 @@ var barMargin = {top: 10, right: 10, bottom: 10, left: 10};
 var barStrokeWidth = 2;
 var barHitVert = 10; //extra hit area padding for top or bottom
 var barHitHor = 10; //extra hit area padding for left or right
+var allBarsSelected = true;
 
 var buttonHeight = 20, 
 	buttonWidth = 100;
@@ -190,7 +215,6 @@ function drawDots(){
 	var yDottedOffset = Math.abs(max - min) * 0.1;
 	yScale.domain([min-yDottedOffset, max]); //TODO make min like 10% less than actual min or something
 	
-	console.log("finished scaling");
 	d3.selectAll(graphParams)
 		.each(function(d, i) {
 			//Current Graph Holder
@@ -299,10 +323,9 @@ function drawGraphs() {
 					colNum = i - 3;
 					rowNum = 1;
 				}
-				console.log("colNum: " + colNum + " rowNum: " + rowNum)
+				
 				var holderX = margin.left + colNum*(graphWidth+2*margin.left);
 				var holderY = margin.top - 30 + rowNum*(graphHeight+margin.top+20);
-				console.log("holderX: " + holderX + " holderY: " + holderY);
 				var holder = svg.append("g")
 					.attr("class", " graph" + i + " graphHolder")
 					.attr("width", graphWidth)
@@ -320,64 +343,159 @@ drawGraphs();
 /********************************
 Map problem correctness data to bottom bar
 ********************************/
-	//Container
-	var barsholderX = margin.left;
-	var barsholderY = (2*graphHeight) + (3*margin.top);
-	var barsholder = svg.append("g")
-		.attr("class", "barsHolder")
-		.attr("width", width)
-		.attr("height", problemSelectorHeight)
-		.attr("transform", "translate(" + barsholderX + "," + barsholderY + ")");
-		
-    //TODO alter the range based on actual learning gains range?
-	var barsY = d3.scale.linear()
-		.domain([0, 1])
-		.range([100+barStrokeWidth, 0]); 
+//Container
+var barsholderX = margin.left;
+var barsholderY = (2*graphHeight) + (3*margin.top);
+var barsholder = svg.append("g")
+	.attr("class", "barsHolder")
+	.attr("width", width)
+	.attr("height", problemSelectorHeight)
+	.attr("transform", "translate(" + barsholderX + "," + barsholderY + ")");
+	
+   //TODO alter the range based on actual learning gains range?
+var barsY = d3.scale.linear()
+	.domain([0, 1])
+	.range([100+barStrokeWidth, 0]); 
 
-	var barsYAxis = d3.svg.axis()
-		.scale(barsY)
-		.orient("left")
-		.ticks(2, "%");	
-		
-	//Y Axis, percentage
-	barsholder.append("g")
-		  .attr("class", "axis")
-		  .call(barsYAxis)
-		.append("text")
-		  .attr("transform", "rotate(-90)")
-		  .attr("y", 0 - margin.left)
-		  .attr("x",0 - (problemSelectorHeight / 2))
-		  .attr("dy", "0.8em")
-		  .style("text-anchor", "middle")
-		  .text("% Correct");
-		  
-	//TODO clean this part up a bit? forloop + array for class names, maybe
-	//Holders for correct bars
-	barsholder.append("g")
-	   .attr("class", "correctBarsA oneBarTypeHolder")
-	   .attr("width", width)
-	   .attr("height", problemSelectorHeight)
+var barsYAxis = d3.svg.axis()
+	.scale(barsY)
+	.orient("left")
+	.ticks(2, "%");	
 	
-	barsholder.append("g")
-	   .attr("class", "correctBarsB oneBarTypeHolder")
-	   .attr("width", width)
-	   .attr("height", problemSelectorHeight)
-	   
-	//Holders for incorrect bars
-	barsholder.append("g")
-	   .attr("class", "incorrectBarsA oneBarTypeHolder")
-	   .attr("width", width)
-	   .attr("height", problemSelectorHeight)
+//Y Axis, percentage
+barsholder.append("g")
+	  .attr("class", "axis")
+	  .call(barsYAxis)
+	.append("text")
+	  .attr("transform", "rotate(-90)")
+	  .attr("y", 0 - margin.left)
+	  .attr("x",0 - (problemSelectorHeight / 2))
+	  .attr("dy", "0.8em")
+	  .style("text-anchor", "middle")
+	  .text("% Correct");
+	  
+//TODO clean this part up a bit? forloop + array for class names, maybe
+//Holders for correct bars
+barsholder.append("g")
+   .attr("class", "correctBarsA oneBarTypeHolder")
+   .attr("width", width)
+   .attr("height", problemSelectorHeight)
+
+barsholder.append("g")
+   .attr("class", "correctBarsB oneBarTypeHolder")
+   .attr("width", width)
+   .attr("height", problemSelectorHeight)
+   
+//Holders for incorrect bars
+barsholder.append("g")
+   .attr("class", "incorrectBarsA oneBarTypeHolder")
+   .attr("width", width)
+   .attr("height", problemSelectorHeight)
+
+barsholder.append("g")
+   .attr("class", "incorrectBarsB oneBarTypeHolder")
+   .attr("width", width)
+   .attr("height", problemSelectorHeight)
+
+// Add the "Select All" and "Deselect All" buttons
+var selectAllButton = svg.append("g")
+	.attr("class", "buttonHolder")
+	.attr("transform", "translate(" + 1250 + "," + barsholderY + ")");
+selectAllButton.append("rect")
+	.attr("class", "switch unpressed")
+	.attr("width", buttonWidth)
+	.attr("height", buttonHeight)
+	.on("click", function(){selectAll();});
+selectAllButton.append("text")
+	.attr("class", "buttonText")
+	.attr("transform", "translate(" + buttonWidth/5 + "," + buttonHeight/1.5 + ")")
+	.text("Select All");
+
+var deselectAllButton = svg.append("g")
+	.attr("class", "buttonHolder")
+	.attr("transform", "translate(" + 1250 + "," + (barsholderY + 1.5*buttonHeight) + ")");
+deselectAllButton.append("rect")
+	.attr("class", "switch unpressed")
+	.attr("width", buttonWidth)
+	.attr("height", buttonHeight)
+	.on("click", function(){deselectAll();});
+deselectAllButton.append("text")
+	.attr("class", "buttonText")
+	.attr("transform", "translate(" + ((buttonWidth/5)-10) + "," + buttonHeight/1.5 + ")")
+	.text("Deselect All");
+
+
+function selectAll() {
+	allBarsSelected = true;
+	d3.selectAll(".bar")
+		.each(function(){
+			var bar_class = this.getAttribute("class");
+			var endIndex = bar_class.indexOf("bar") + 4; 
+			var new_class = bar_class.substring(0,endIndex) + "selected";
+			this.setAttribute("class", new_class);
+		});
+}
+
+function deselectAll() {
+	d3.selectAll(".bar")
+		.each(function(){
+			var bar_class = this.getAttribute("class");
+			var endIndex = bar_class.indexOf("bar") + 4; 
+			var new_class = bar_class.substring(0,endIndex) + "unselected";
+			this.setAttribute("class", new_class);
+		});
+}
+
+function onBarClick(bar_object, d) {
+	if (allBarsSelected) {
+		deselectAll();
+		allBarsSelected = false;
+	}
 	
-	barsholder.append("g")
-	   .attr("class", "incorrectBarsB oneBarTypeHolder")
-	   .attr("width", width)
-	   .attr("height", problemSelectorHeight)
+	var bar_class = bar_object.getAttribute("class");
+	var new_class = bar_class.replace(/unselected/g, 'selected');
+	bar_object.setAttribute("class", new_class);
+	
+	// d3.select(bar_object).style("stroke", "magenta");
+	// var bar_class = d3.select(bar_object).attr("class");
+	// console.log("bar_class: " + bar_class);
+	// var new_class = bar_class.replace(/unselected/g, 'selected');
+	// d3.select(bar_object).attr("class", new_class);
+	// var bar_class = d3.select(bar_object).attr("class");
+	// console.log("bar_class: " + bar_class);
+	
+	// console.log("bar clicked! unit: " + d["Unit"]);
+	// console.log("bar clicked! type: " + d["Type"]);
+	// console.log("bar clicked! question: " + d["Question"]);
+	// 
+	// var type = d["Type"];
+	// var question = d["Question"];
+	// 
+	// var identifier = "rect#" + question + "." + bar_class;
+	// var iden = "." + bar_class + ", rect"
+	// var bars = d3.selectAll("rect." + bar_class);
+	// 
+	// 
+	// var idString = "#problem" + d["Question"];
+	// idString = idString.replace(/\./g,"");
+	// console.log("idString: " + idString);
+	// 
+	// var b = d3.selectAll(idString).selectAll("."+bar_class).style("fill", "black");
+	// //.selectAll("."+bar_class);
+	// 
+	// console.log("class: " + bar_class);
+	// console.log("bars: " + bars);
+	// console.log("b: " + b);
+}
+
 	   
 //TODO separate out drawing the gridlines and the bars like I did for the dots
 function drawProblemBars(){    
 d3.csv("problems2.csv", function(data){
 	problemsDataset = data.map(function(d){return d;});
+	
+	// When you select a new unit and test, we want all the bars to start out selected
+	allBarsSelected = true;
 
 	//TODO create a wrapper for each bar that is its mouseover area
 	//.data([{selected: false}]) to store info about whether it is pressed or not
@@ -388,26 +506,25 @@ d3.csv("problems2.csv", function(data){
 		 .key(function(d) { return d.Unit; })
 		 .key(function(d) { return d.Type; })
 		 .entries(data);
-
+	
 	//Select all rows of current unit
 	d3.selectAll(groups)
 		.each(function(d2, k){ 
 			if(this.key == CURRENT_UNIT){
 				//Map A and B separately for 4 groups of bars: A-correct, A-incorrect, B-correct, B-incorrect 
 				d3.selectAll(this.values)
-					.each(function(dat, j) {
+					.each(function(dat, j){
 
-                       	//TODO bars with 0 values look really weird
-                        //simplify selection for pre/post
-                        var corr = CURRENT_PREPOST + " Correct";
-                        var incorr = CURRENT_PREPOST + " Incorrect";
+						//simplify selection for pre/post
+						var corr = CURRENT_PREPOST + " Correct";
+						var incorr = CURRENT_PREPOST + " Incorrect";
 
-                        var correctBars = barsholder.select(".correctBars" + this.key)
-                                .selectAll("rect")
-                                .data(this.values);
-                        correctBars.enter().append("rect");
-                       
-                        //must draw hitArea before actual bar for CSS next sibling selector to work            
+						var correctBars = barsholder.select(".correctBars" + this.key)
+								.selectAll("rect")
+								.data(this.values);																
+						correctBars.enter().append("rect");
+						
+						//must draw hitArea before actual bar for CSS next sibling selector to work            
 						// correctBars
 						// 	.append("rect")
 						// 	.data(this.values)
@@ -418,20 +535,21 @@ d3.csv("problems2.csv", function(data){
 						// 		.attr("height", function(d) {return barHitVert + barStrokeWidth + problemSelectorHeight - barsY(+d[corr]/(+d[corr]+(+d[incorr]))); });                                     
 						
 						correctBars
-							.attr("class", this.key + " correct bar")
+							.attr("class", this.key + " correct bar selected")
 							.attr("x", function(d, i) { return (j*(barStrokeWidth + barWidth))+i*(barSpacing); })
 							.attr("width", barWidth)
 							.attr("y", function(d){ return barsY(+d[corr]/(+d[corr]+(+d[incorr])));})
-							.attr("height", function(d) {return barStrokeWidth + problemSelectorHeight - barsY(+d[corr]/(+d[corr]+(+d[incorr]))); });	
-    
+							.attr("height", function(d) {return barStrokeWidth + problemSelectorHeight - barsY(+d[corr]/(+d[corr]+(+d[incorr]))); })
+							.on("click", function(d){onBarClick(this, d);});
+							
 						correctBars.exit().remove();
 
-                        var incorrectBars = barsholder.select(".incorrectBars" + this.key)
-                                .selectAll("rect")
-                                .data(this.values);
-                        incorrectBars.enter().append("rect");
-
-                        //must draw hitArea before actual bar for CSS next sibling selector to work            
+						var incorrectBars = barsholder.select(".incorrectBars" + this.key)
+								.selectAll("rect")
+								.data(this.values);			
+						incorrectBars.enter().append("rect")
+						
+						//must draw hitArea before actual bar for CSS next sibling selector to work            
 						// incorrectBars
 						// 	.append("rect")
 						// 	.data(this.values)
@@ -442,17 +560,18 @@ d3.csv("problems2.csv", function(data){
 						// 		.attr("height", function(d) {return barHitVert + Math.max(0, problemSelectorHeight - barsY(+d[incorr]/(+d[corr]+(+d[incorr])))); });                                     
 						
 						incorrectBars
-							.attr("class", this.key + " incorrect bar")
+							.attr("class", this.key + " incorrect bar selected")
 							.attr("x", function(d, i) { return (j*(barStrokeWidth + barWidth))+i*(barSpacing); })
 							.attr("width", barWidth)
 							.attr("y", 0)
-							.attr("height", function(d) { return Math.max(0, problemSelectorHeight - barsY(+d[incorr]/(+d[corr]+(+d[incorr])))); });                      
-                               
+							.attr("height", function(d) { return Math.max(0, problemSelectorHeight - barsY(+d[incorr]/(+d[corr]+(+d[incorr])))); })
+							.on("click", function(d){onBarClick(this, d);});
+							
 						incorrectBars.exit().remove();		
-					});
-				}					
-			});		
-		});
+				   });
+			}
+		});		
+});
 }
 drawProblemBars();
 
