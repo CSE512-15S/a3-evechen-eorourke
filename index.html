@@ -13,6 +13,10 @@
 			fill: #4169E1;
 		}
 		
+		.dot.unselected {
+			fill: #DDDDDD;
+		}
+		
 		.unknown.dot{
 			opacity: 0.0;
 		}
@@ -285,10 +289,15 @@ function drawDots(){
 							else
 								t == "unknown";
 						}
+						
+						var dotSelection = "selected";
+						if (!allBarsSelected) {
+							dotSelection = setDotSelection(d, t);
+						}
 						if(t == "A" || t == "B")
-							return t + " dot";
+							return t + " dot " + dotSelection;
 						else
-							return "unknown dot";
+							return "unknown dot " + dotSelection;
 					})
 				.attr("transform", function(d) { 
 							var gains = d["Unit " + CURRENT_UNIT + " Learning Gain"];
@@ -305,6 +314,41 @@ function drawDots(){
 				.remove();
 	});
 }
+
+function setDotSelection(dotData, dotType) {	
+	var selected = false;
+	
+	for(var i = 0; i < selectedBars.length; i++) {
+		var barData = selectedBars[i];		
+		if (dotType == barData.test_type) {
+			var key;
+			if (CURRENT_UNIT == 2 && CURRENT_PREPOST == "Pre") {
+				key = "Unit2_Pre_" + barData.question;
+			}
+			else if (CURRENT_UNIT == 2 && CURRENT_PREPOST == "Post") {
+				key = "Unit2_Post_" + barData.question;
+			}
+			else if (CURRENT_UNIT == 4 && CURRENT_PREPOST == "Pre") {
+				key = "Unit4_Pre_" + barData.question;
+			}
+			else if (CURRENT_UNIT == 4 && CURRENT_PREPOST == "Post") {
+				key = "Unit4_Post_" + barData.question;
+			}
+			var answer = dotData[key];
+			if ((barData.correctness == "correct" && answer == 1) || (barData.correctness == "incorrect" && answer == 0)) {
+				selected = true;
+			}			
+		}		
+	}
+	
+	if (selected) {
+		return "selected";
+	}
+	else {
+		return "unselected";
+	}
+}
+
 
 // version that does not nest by condition
 function drawGraphs() {
@@ -424,6 +468,8 @@ deselectAllButton.append("text")
 	.attr("transform", "translate(" + ((buttonWidth/5)-10) + "," + buttonHeight/1.5 + ")")
 	.text("Deselect All");
 
+// Object to hold information about the currently selected bars (only used when not all bars are selected)
+var selectedBars = [];
 
 function selectAll() {
 	allBarsSelected = true;
@@ -434,9 +480,12 @@ function selectAll() {
 			var new_class = bar_class.substring(0,endIndex) + "selected";
 			this.setAttribute("class", new_class);
 		});
+	selectedBars = [];
+	drawDots();
 }
 
 function deselectAll() {
+	allBarsSelected = false;
 	d3.selectAll(".bar")
 		.each(function(){
 			var bar_class = this.getAttribute("class");
@@ -444,6 +493,8 @@ function deselectAll() {
 			var new_class = bar_class.substring(0,endIndex) + "unselected";
 			this.setAttribute("class", new_class);
 		});
+	selectedBars = [];
+	drawDots();
 }
 
 function onBarClick(bar_object) {
@@ -455,6 +506,23 @@ function onBarClick(bar_object) {
 	var bar_class = bar_object.getAttribute("class");
 	var new_class = bar_class.replace(/unselected/g, 'selected');
 	bar_object.setAttribute("class", new_class);
+	
+	// store information about the newly selected bar in the selectedBars data structure
+	var t = new_class[0];
+	var c = "correct";
+	if (new_class.indexOf("incorrect") > 0) {
+		c = "incorrect";
+	}
+	var i = bar_object.getAttribute("id");
+	i = i.substring(7);
+	q = i[0];
+	if (q != "4") {
+		q = q + "." + i.substring(1);
+	}
+	
+	console.log("appended question: " + q + " type: " + t + " correctness: " + c);
+	selectedBars.push({question:q, test_type:t, correctness:c});
+	drawDots();
 }
 
 	   
@@ -505,6 +573,7 @@ d3.csv("problems2.csv", function(data){
 						
 						correctBars
 							.attr("class", this.key + " correct bar selected")
+							.attr("id", function(d) { return ("problem" + d["Question"]).replace(/\./g,"");})
 							.attr("x", function(d, i) { return (j*(barStrokeWidth + barWidth))+i*(barSpacing); })
 							.attr("width", barWidth)
 							.attr("y", function(d){ return barsY(+d[corr]/(+d[corr]+(+d[incorr])));})
@@ -530,6 +599,7 @@ d3.csv("problems2.csv", function(data){
 						
 						incorrectBars
 							.attr("class", this.key + " incorrect bar selected")
+							.attr("id", function(d) { return ("problem" + d["Question"]).replace(/\./g,"");})
 							.attr("x", function(d, i) { return (j*(barStrokeWidth + barWidth))+i*(barSpacing); })
 							.attr("width", barWidth)
 							.attr("y", 0)
@@ -593,8 +663,11 @@ function switchCondition(e){
 				buttons[buttonNames[x]].select("rect").call(setPressedSize);
 			}
 		}
-		drawDots();
 		drawProblemBars();
+		// reset the dot selection before drawing dots
+		allBarsSelected = true;
+		selectedBars = [];
+		drawDots();
 	}
 }
 //Make buttons to switch between Unit, Pre-Post (4 conditions total)
