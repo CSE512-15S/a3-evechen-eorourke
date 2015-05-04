@@ -54,3 +54,14 @@ DONE
 - EX - AP -> Exercise and Assessment
 - axes intersect at the wrong place - how to label?
 -  make axes stand out at the zeroes, lighter grey for label line, copy Tableau's dotted line and intersecting zeroes
+- question number labels
+- incorrect bar alignment issue
+- clicking tiny bars??
+
+
+
+After Nell is done:
+- graph title
+- change select button text based on whether we are doing A/B or tablet/paper
+- toggle select/deselect?
+- negative AP percentages??
