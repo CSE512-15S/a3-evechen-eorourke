@@ -61,8 +61,9 @@ First:
 - question number labels
 - incorrect bar alignment issue
 - clicking tiny bars??
-- HIT area problems
+- invisible dots should stay invisible
 - toggle select/deselect?
+- negative AP percentages??
 
 After Nell is done:
 - check: style, opacity 0 instead of just opacity 0 
