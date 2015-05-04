@@ -17,6 +17,14 @@
 			fill: #4169E1;
 		}
 		
+		.paper.dot{
+			fill: #af8dc3;
+		}
+		
+		.tablet.dot{
+			fill: #7fbf7b;
+		}
+		
 		.dot.unselected {
 			fill: #DDDDDD;
 		}
@@ -329,24 +337,39 @@ function drawDots(){
 				.attr("r", 1.5);
 			
 			dots.attr("class", function(d) {
-						var t = d["Unit " + CURRENT_UNIT + " Pre-Test Type"].toUpperCase();
-						if(CURRENT_PREPOST == "Post"){
-							if(t == "A")
-								t == "B";
-							else if(t == "B")
-								t == "A";
+						if (CURRENT_VARIABLE == "test_type") {
+							var t = d["Unit " + CURRENT_UNIT + " Pre-Test Type"].toUpperCase();
+							if(CURRENT_PREPOST == "Post"){
+								if(t == "A")
+									t = "B";
+								else if(t == "B")
+									t = "A";
+								else
+									t = "unknown";
+							}
+							if (t == "")
+								t = "unknown";
+
+							var dotSelection = "selected";
+							if (!allBarsSelected) {
+								dotSelection = setDotSelection(d, t);
+							}
+							if(t == "A" || t == "B")
+								return t + " dot " + dotSelection;
 							else
-								t == "unknown";
+								return "unknown dot " + dotSelection;
 						}
-						
-						var dotSelection = "selected";
-						if (!allBarsSelected) {
-							dotSelection = setDotSelection(d, t);
+						else {
+							var t = d["Condition"];
+							var dotSelection = "selected";
+							if (!allBarsSelected) {
+								dotSelection = setDotSelection(d, t);
+							}
+							if(t == "tablet" || t == "paper")
+								return t + " dot " + dotSelection;
+							else
+								return "unknown dot " + dotSelection;
 						}
-						if(t == "A" || t == "B")
-							return t + " dot " + dotSelection;
-						else
-							return "unknown dot " + dotSelection;
 					})
 				.attr("transform", function(d) { 
 							var gains = d["Unit " + CURRENT_UNIT + " Learning Gain"];
@@ -368,7 +391,8 @@ function setDotSelection(dotData, dotType) {
 	var selected = false;
 	
 	for(var i = 0; i < selectedBars.length; i++) {
-		var barData = selectedBars[i];		
+		var barData = selectedBars[i];
+		dotType = dotType[0];
 		if (dotType == barData.test_type) {
 			var key;
 			if (CURRENT_UNIT == 2 && CURRENT_PREPOST == "Pre") {
