@@ -5,6 +5,10 @@
 		<title>What Affects Learning Gains?</title>
 		<style>
 
+		.hidden {
+			visibility: hidden;
+		}
+		
 		.A.dot{
 			fill: #FFA500;
 		}
@@ -36,6 +40,50 @@
         
 		rect.bar:hover{
 			stroke: black;
+		}
+		
+		.paper.correct.selected{
+			fill: #af8dc3;
+			stroke: #af8dc3;
+		}
+		
+		.tablet.correct.selected{
+			fill: #7fbf7b;
+			stroke: #7fbf7b;
+		}
+		
+		.paper.incorrect.selected{
+			fill: #e7d4e8;
+			stroke: #e7d4e8;
+		}
+		
+		.tablet.incorrect.selected{
+			fill: #d9f0d3;
+			stroke: #d9f0d3;
+		}
+		
+		.paper.correct.unselected{
+			fill: #DDDDDD;
+			stroke: #999999;
+			stroke-width: 1;
+		}
+		
+		.tablet.correct.unselected{
+			fill: #DDDDDD;
+			stroke: #999999;
+			stroke-width: 1;
+		}
+		
+		.paper.incorrect.unselected{
+			fill: #DDDDDD;
+			stroke: #999999;
+			stroke-width: 1;
+		}
+		
+		.tablet.incorrect.unselected{
+			fill: #DDDDDD;
+			stroke: #999999;
+			stroke-width: 1;
 		}
 
 		.A.correct.selected{
@@ -442,6 +490,58 @@ barsholder.append("g")
    .attr("width", width)
    .attr("height", problemSelectorHeight)
 
+//Container for Conditions
+var barsholderCondition = svg.append("g")
+	.attr("class", "barsHolderCondition hidden")
+	.attr("width", width)
+	.attr("height", problemSelectorHeight)
+	.attr("transform", "translate(" + barsholderX + "," + barsholderY + ")");
+
+   //TODO alter the range based on actual learning gains range?
+var barsY = d3.scale.linear()
+	.domain([0, 1])
+	.range([100+barStrokeWidth, 0]); 
+
+var barsYAxis = d3.svg.axis()
+	.scale(barsY)
+	.orient("left")
+	.ticks(2, "%");	
+
+//Y Axis, percentage
+barsholderCondition.append("g")
+	  .attr("class", "axis")
+	  .call(barsYAxis)
+	.append("text")
+	  .attr("transform", "rotate(-90)")
+	  .attr("y", 0 - margin.left)
+	  .attr("x",0 - (problemSelectorHeight / 2))
+	  .attr("dy", "0.8em")
+	  .style("text-anchor", "middle")
+	  .text("% Correct");
+
+//TODO clean this part up a bit? forloop + array for class names, maybe
+//Holders for correct bars
+barsholderCondition.append("g")
+   .attr("class", "correctBarspaper oneBarTypeHolder")
+   .attr("width", width)
+   .attr("height", problemSelectorHeight)
+
+barsholderCondition.append("g")
+   .attr("class", "correctBarstablet oneBarTypeHolder")
+   .attr("width", width)
+   .attr("height", problemSelectorHeight)
+
+//Holders for incorrect bars
+barsholderCondition.append("g")
+   .attr("class", "incorrectBarspaper oneBarTypeHolder")
+   .attr("width", width)
+   .attr("height", problemSelectorHeight)
+
+barsholderCondition.append("g")
+   .attr("class", "incorrectBarstablet oneBarTypeHolder")
+   .attr("width", width)
+   .attr("height", problemSelectorHeight)
+
 // Add the "Select All" and "Deselect All" buttons
 var selectAllButton = svg.append("g")
 	.attr("class", "buttonHolder")
@@ -526,15 +626,45 @@ function onBarClick(bar_object) {
 	drawDots();
 }
 
+function setBarHolderVisibility() {
+	if (CURRENT_VARIABLE == "test_type") {		
+		// hide condition holder
+		var holder_class = d3.select(".barsHolderCondition").attr("class");
+		if (holder_class.indexOf("hidden") < 0) {
+			holder_class = holder_class + " hidden";
+			d3.select(".barsHolderCondition").attr("class", holder_class);
+		}
+		// show test holder
+		var holder_class = d3.select(".barsHolder").attr("class");
+		if (holder_class.indexOf("hidden") > 0) {
+			holder_class = holder_class.substring(0, (holder_class.indexOf("hidden")-1));
+			d3.select(".barsHolder").attr("class", holder_class);
+		}
+	}
+	else {
+		// hide test holder
+		var holder_class = d3.select(".barsHolder").attr("class");
+		if (holder_class.indexOf("hidden") < 0) {
+			holder_class = holder_class + " hidden";
+			d3.select(".barsHolder").attr("class", holder_class);
+		}
+		// show condition holder
+		var holder_class = d3.select(".barsHolderCondition").attr("class");
+		if (holder_class.indexOf("hidden") > 0) {
+			holder_class = holder_class.substring(0, (holder_class.indexOf("hidden")-1));
+			d3.select(".barsHolderCondition").attr("class", holder_class);
+		}
+	}
+}
 	   
 //TODO separate out drawing the gridlines and the bars like I did for the dots
-function drawProblemBars(){   
+function drawProblemBars(){
 	var problemsFile = "problems2.csv";
 	if (CURRENT_VARIABLE == "condition") {
 		problemsFile = "problems_condition.csv";
 	}
 	
-	d3.csv("problems2.csv", function(data){
+	d3.csv(problemsFile, function(data){
 		problemsDataset = data.map(function(d){return d;});
 	
 		// When you select a new unit and test, we want all the bars to start out selected
@@ -549,6 +679,15 @@ function drawProblemBars(){
 			 .key(function(d) { return d.Unit; })
 			 .key(function(d) { return d.Type; })
 			 .entries(data);
+		if (CURRENT_VARIABLE == "condition") {
+			var groups = d3.nest()
+				 .key(function(d) { return d.Unit; })
+				 .key(function(d) { return d.Condition; })
+				 .entries(data);
+			console.log("groups: " + groups);
+		}
+		
+		setBarHolderVisibility();
 	
 		//Select all rows of current unit
 		d3.selectAll(groups)
@@ -561,8 +700,13 @@ function drawProblemBars(){
 							//simplify selection for pre/post
 							var corr = CURRENT_PREPOST + " Correct";
 							var incorr = CURRENT_PREPOST + " Incorrect";
+							
+							var holder = barsholder;
+							if (CURRENT_VARIABLE == "condition") {
+								holder = barsholderCondition;
+							}
 
-							var correctBars = barsholder.select(".correctBars" + this.key)
+							var correctBars = holder.select(".correctBars" + this.key)
 									.selectAll("rect")
 									.data(this.values);																
 							correctBars.enter().append("rect");
@@ -588,7 +732,7 @@ function drawProblemBars(){
 							
 							correctBars.exit().remove();
 
-							var incorrectBars = barsholder.select(".incorrectBars" + this.key)
+							var incorrectBars = holder.select(".incorrectBars" + this.key)
 									.selectAll("rect")
 									.data(this.values);			
 							incorrectBars.enter().append("rect")
@@ -724,11 +868,11 @@ function switchVariable(e){
 	}
 	
 	if (changed) {
-		// drawProblemBars();
-		// // reset the dot selection before drawing dots
-		// allBarsSelected = true;
-		// selectedBars = [];
-		// drawDots();
+		 drawProblemBars();
+		// reset the dot selection before drawing dots
+		allBarsSelected = true;
+		selectedBars = [];
+		drawDots();
 	}
 }
 
