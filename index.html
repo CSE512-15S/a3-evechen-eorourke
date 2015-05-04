@@ -576,63 +576,131 @@ barsholder.append("g")
    .attr("height", problemSelectorHeight)
 
 // Add the "Select All" and "Deselect All" buttons
+var selectAllButton = svg.append("g")
+	.attr("class", "buttonHolder")
+	.attr("transform", "translate(" + 1120 + "," + barsholderY + ")");
+selectAllButton.append("rect")
+	.attr("class", "switch unpressed")
+	.attr("width", buttonWidth)
+	.attr("height", buttonHeight)
+	.on("click", function(){selectAll();});
+selectAllButton.append("text")
+	.attr("class", "buttonText")
+	.attr("transform", "translate(" + buttonWidth/5 + "," + buttonHeight/1.5 + ")")
+	.text("Select All");
+
+var deselectAllButton = svg.append("g")
+	.attr("class", "buttonHolder")
+	.attr("transform", "translate(" + 1120 + "," + (barsholderY + 1.3*buttonHeight) + ")");
+deselectAllButton.append("rect")
+	.attr("class", "switch unpressed")
+	.attr("width", buttonWidth)
+	.attr("height", buttonHeight)
+	.on("click", function(){deselectAll();});
+deselectAllButton.append("text")
+	.attr("class", "buttonText")
+	.attr("transform", "translate(" + ((buttonWidth/5)-10) + "," + buttonHeight/1.5 + ")")
+	.text("Deselect All");
+/*
 var selectAllAButton = svg.append("g")
+	.attr("id", "selectAllAButton")
 	.attr("class", "buttonHolder")
 	.attr("transform", "translate(" + 1120 + "," + barsholderY + ")");
 selectAllAButton.append("rect")
 	.attr("class", "switch unpressed")
 	.attr("width", buttonWidth)
 	.attr("height", buttonHeight)
-	.on("click", function(){selectAll();});
+	.on("click", function(){selectAll("A");});
 selectAllAButton.append("text")
 	.attr("class", "buttonText")
-	.attr("transform", "translate(" + buttonWidth/5 + "," + buttonHeight/1.5 + ")")
-	.text("Select All A");
+	.attr("transform", "translate(" + buttonWidth/3 + "," + buttonHeight/1.5 + ")")
+	.text("All A");
 
 var deselectAllAButton = svg.append("g")
+	.attr("id", "deselectAllAButton")
 	.attr("class", "buttonHolder")
-	.attr("transform", "translate(" + 1120 + "," + (barsholderY + 1.5*buttonHeight) + ")");
+	.attr("transform", "translate(" + 1120 + "," + (barsholderY + 1.3*buttonHeight) + ")");
 deselectAllAButton.append("rect")
 	.attr("class", "switch unpressed")
 	.attr("width", buttonWidth)
 	.attr("height", buttonHeight)
-	.on("click", function(){deselectAll();});
+	.on("click", function(){deselectAll("A");});
 deselectAllAButton.append("text")
 	.attr("class", "buttonText")
-	.attr("transform", "translate(" + ((buttonWidth/5)-10) + "," + buttonHeight/1.5 + ")")
-	.text("Deselect All A");
+	.attr("transform", "translate(" + ((buttonWidth/3)) + "," + buttonHeight/1.5 + ")")
+	.text("No A");
 	
 var selectAllBButton = svg.append("g")
 	.attr("class", "buttonHolder")
-	.attr("transform", "translate(" + 1120 + "," + (barsholderY + 2.5*buttonHeight) + ")");
+	.attr("id", "selectAllBButton")
+	.attr("transform", "translate(" + 1120 + "," + (barsholderY + 3*buttonHeight) + ")");
 selectAllBButton.append("rect")
 	.attr("class", "switch unpressed")
 	.attr("width", buttonWidth)
 	.attr("height", buttonHeight)
-	.on("click", function(){selectAll();});
+	.on("click", function(){selectAll("B");});
 selectAllBButton.append("text")
 	.attr("class", "buttonText")
-	.attr("transform", "translate(" + buttonWidth/5 + "," + buttonHeight/1.5 + ")")
-	.text("Select All B");
+	.attr("transform", "translate(" + buttonWidth/3 + "," + buttonHeight/1.5 + ")")
+	.text("All B");
 
 var deselectAllBButton = svg.append("g")
+	.attr("id", "deselectAllBButton")
 	.attr("class", "buttonHolder")
-	.attr("transform", "translate(" + 1120 + "," + (barsholderY + 3.5*buttonHeight) + ")");
+	.attr("transform", "translate(" + 1120 + "," + (barsholderY + 4.2*buttonHeight) + ")");
 deselectAllBButton.append("rect")
 	.attr("class", "switch unpressed")
 	.attr("width", buttonWidth)
 	.attr("height", buttonHeight)
-	.on("click", function(){deselectAll();});
+	.on("click", function(){deselectAll("B");});
 deselectAllBButton.append("text")
 	.attr("class", "buttonText")
-	.attr("transform", "translate(" + ((buttonWidth/5)-10) + "," + buttonHeight/1.5 + ")")
-	.text("Deselect All B");
+	.attr("transform", "translate(" + ((buttonWidth/3)) + "," + buttonHeight/1.5 + ")")
+	.text("No B");
+*/
 
 // Object to hold information about the currently selected bars (only used when not all bars are selected)
 var selectedBars = [];
 
+/*
+function selectAll(type) {
+	allBarsSelected = true;
+	var t = type;
+	if(CURRENT_VARIABLE == "condition")
+		t = (type == "A")  ? "tablet" : "paper";
+			
+	d3.selectAll("." + t + ".bar")
+		.each(function(){
+			var bar_class = this.getAttribute("class");
+			var endIndex = bar_class.indexOf("bar") + 4; 
+			var new_class = bar_class.substring(0,endIndex) + "selected";
+			this.setAttribute("class", new_class);
+		});
+	selectedBars = [];
+	drawDots();
+}
+
+function deselectAll(type) {
+	allBarsSelected = false;
+	var t = type;
+	if(CURRENT_VARIABLE == "condition")
+		t = (type == "A")  ? "tablet" : "paper";
+		
+	d3.selectAll("." + t + ".bar")
+		.each(function(){
+			var bar_class = this.getAttribute("class");
+			var endIndex = bar_class.indexOf("bar") + 4; 
+			var new_class = bar_class.substring(0,endIndex) + "unselected";
+			this.setAttribute("class", new_class);
+		});
+	selectedBars = [];
+	drawDots();
+}
+*/
+
 function selectAll() {
 	allBarsSelected = true;
+	
 	d3.selectAll(".bar")
 		.each(function(){
 			var bar_class = this.getAttribute("class");
@@ -646,6 +714,8 @@ function selectAll() {
 
 function deselectAll() {
 	allBarsSelected = false;
+
+		
 	d3.selectAll(".bar")
 		.each(function(){
 			var bar_class = this.getAttribute("class");
@@ -729,17 +799,13 @@ function drawProblemBars(){
 							var corr = CURRENT_PREPOST + " Correct";
 							var incorr = CURRENT_PREPOST + " Incorrect";
 							
-							var tail = "";
-							var style_var = "";
+							var tail = (this.key == "A") ? "A" : "B";
+							var style_var = tail;
 							
 							//Map tablet/paper to A/B so we don't have to create entirely new bar holders
 							if(CURRENT_VARIABLE == "condition"){
 								tail = (this.key == "tablet") ? "A" : "B";
 								style_var =  (this.key == "tablet") ? "tablet" : "paper";
-							}
-							else if(CURRENT_VARIABLE == "test_type"){
-								tail = (this.key == "A") ? "A" : "B";
-								style_var = tail;
 							}
 							
 							barsholder.select(".correctBars" + tail)
@@ -861,7 +927,6 @@ function drawProblemBars(){
 }
 drawProblemBars();
 
-
 /******************************
 Buttons
 ******************************/
@@ -972,6 +1037,21 @@ function switchVariable(e){
 		legendClass = legendClass + " hidden";
 		d3.select(".legendCondition").attr("class",legendClass);
 		
+		/*
+		//this is ugly, I'm sorry
+		d3.select("#selectAllAButton").select("text")
+				.attr("transform", "translate(" + buttonWidth/3 + "," + buttonHeight/1.5 + ")")
+				.text("All A");
+		d3.select("#deselectAllAButton").select("text")
+				.attr("transform", "translate(" + ((buttonWidth/3)) + "," + buttonHeight/1.5 + ")")
+				.text("No A");
+		d3.select("#selectAllBButton").select("text")
+				.attr("transform", "translate(" + buttonWidth/3 + "," + buttonHeight/1.5 + ")")
+				.text("All B");
+		d3.select("#deselectAllBButton").select("text")
+				.attr("transform", "translate(" + ((buttonWidth/3)) + "," + buttonHeight/1.5 + ")")
+				.text("No B");
+		*/		
 		changed = true;
 	}
 	else if (e.name == "condition" && CURRENT_VARIABLE != "condition") {
@@ -985,7 +1065,22 @@ function switchVariable(e){
 		var legendClass = d3.selectAll(".legendTest").attr("class");
 		legendClass = legendClass + " hidden";
 		d3.select(".legendTest").attr("class",legendClass);
-		
+
+		/*
+		//this is ugly too, I'm sorry
+		d3.select("#selectAllAButton").select("text")
+				.attr("transform", "translate(" + buttonWidth/5 + "," + buttonHeight/1.5 + ")")
+				.text("All Tablet");
+		d3.select("#deselectAllAButton").select("text")
+				.attr("transform", "translate(" + ((buttonWidth/5)) + "," + buttonHeight/1.5 + ")")
+				.text("No Tablet");
+		d3.select("#selectAllBButton").select("text")
+				.attr("transform", "translate(" + buttonWidth/5 + "," + buttonHeight/1.5 + ")")
+				.text("All Paper");
+		d3.select("#deselectAllBButton").select("text")
+				.attr("transform", "translate(" + ((buttonWidth/5)) + "," + buttonHeight/1.5 + ")")
+				.text("No Paper");
+		*/		
 		changed = true;
 	}
 	
