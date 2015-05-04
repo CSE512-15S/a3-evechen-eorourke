@@ -446,7 +446,7 @@ function deselectAll() {
 		});
 }
 
-function onBarClick(bar_object, d) {
+function onBarClick(bar_object) {
 	if (allBarsSelected) {
 		deselectAll();
 		allBarsSelected = false;
@@ -455,37 +455,6 @@ function onBarClick(bar_object, d) {
 	var bar_class = bar_object.getAttribute("class");
 	var new_class = bar_class.replace(/unselected/g, 'selected');
 	bar_object.setAttribute("class", new_class);
-	
-	// d3.select(bar_object).style("stroke", "magenta");
-	// var bar_class = d3.select(bar_object).attr("class");
-	// console.log("bar_class: " + bar_class);
-	// var new_class = bar_class.replace(/unselected/g, 'selected');
-	// d3.select(bar_object).attr("class", new_class);
-	// var bar_class = d3.select(bar_object).attr("class");
-	// console.log("bar_class: " + bar_class);
-	
-	// console.log("bar clicked! unit: " + d["Unit"]);
-	// console.log("bar clicked! type: " + d["Type"]);
-	// console.log("bar clicked! question: " + d["Question"]);
-	// 
-	// var type = d["Type"];
-	// var question = d["Question"];
-	// 
-	// var identifier = "rect#" + question + "." + bar_class;
-	// var iden = "." + bar_class + ", rect"
-	// var bars = d3.selectAll("rect." + bar_class);
-	// 
-	// 
-	// var idString = "#problem" + d["Question"];
-	// idString = idString.replace(/\./g,"");
-	// console.log("idString: " + idString);
-	// 
-	// var b = d3.selectAll(idString).selectAll("."+bar_class).style("fill", "black");
-	// //.selectAll("."+bar_class);
-	// 
-	// console.log("class: " + bar_class);
-	// console.log("bars: " + bars);
-	// console.log("b: " + b);
 }
 
 	   
@@ -540,7 +509,7 @@ d3.csv("problems2.csv", function(data){
 							.attr("width", barWidth)
 							.attr("y", function(d){ return barsY(+d[corr]/(+d[corr]+(+d[incorr])));})
 							.attr("height", function(d) {return barStrokeWidth + problemSelectorHeight - barsY(+d[corr]/(+d[corr]+(+d[incorr]))); })
-							.on("click", function(d){onBarClick(this, d);});
+							.on("click", function(){onBarClick(this);});
 							
 						correctBars.exit().remove();
 
@@ -565,7 +534,7 @@ d3.csv("problems2.csv", function(data){
 							.attr("width", barWidth)
 							.attr("y", 0)
 							.attr("height", function(d) { return Math.max(0, problemSelectorHeight - barsY(+d[incorr]/(+d[corr]+(+d[incorr])))); })
-							.on("click", function(d){onBarClick(this, d);});
+							.on("click", function(){onBarClick(this);});
 							
 						incorrectBars.exit().remove();		
 				   });
