@@ -4,6 +4,66 @@
 		<meta charset="utf-8">
 		<title>What Affects Learning Gains?</title>
 		<style>
+		
+		svg {
+			position: fixed;
+		}
+		.sidebar {
+			position: fixed;
+			top: 0px;
+			left: 900px;
+			width: 400px;
+		}
+		
+		.sidebarLow {
+			position: fixed;
+			top: 330px;
+			left: 900px;
+			width: 400px;
+		}
+		
+		.ledgend {
+			position: fixed;
+			top: 480px;
+			left: 900px;
+		}
+		
+		.AColor {
+			width: 50px;
+			height: 10px;
+			background-color: #FFA500;
+		}
+		
+		.BColor {
+			width: 50px;
+			height: 10px;
+			background-color: #4169E1;
+		}
+		
+		.tabletColor {
+			width: 50px;
+			height: 10px;
+			background-color: #7fbf7b;
+		}
+		
+		.paperColor {
+			width: 50px;
+			height: 10px;
+			background-color: #af8dc3;
+		}
+		
+		.titleText {
+			font-size: 14pt;
+            font-family: Verdana;
+            color: #555555;
+		}
+		
+		.caption {
+			font-size: 10pt;
+            font-family: Verdana;
+			width:150;
+            color: #555555;
+		}
 
 		.hidden {
 			visibility: hidden;
@@ -788,10 +848,19 @@ function drawProblemBars(){
 }
 drawProblemBars();
 
-		
+
 /******************************
 Buttons
-******************************/	
+******************************/
+
+var sidebar = svg.append("g")
+	.attr("class", "sidebar");
+
+var unitButtonsSidebar = sidebar.append("g")
+	.attr("transform", "translate(" + 50 + "," + 270 + ")");
+var variableButtonsSidebar = sidebar.append("g")
+	.attr("transform", "translate(" + 50 + "," + 340 + ")");
+
 var buttons = [];
 var buttonNames = ["Unit 2 Pre", "Unit 2 Post", "Unit 4 Pre", "Unit 4 Post"];
 var shrinkConstant = 0.98;
@@ -848,7 +917,7 @@ function switchCondition(e){
 for(var x = 0; x < buttonNames.length; x++){
 
 		var dy = x <= 1 ? 0 : 1;
-		var temp  = svg.append("g")
+		var temp  = unitButtonsSidebar.append("g")
 		.attr("class", "buttonHolder")
 		.attr("transform", "translate(" + (900+110*(x%2)) + "," + 1.5*buttonHeight*dy + ")");
 
@@ -882,12 +951,28 @@ function switchVariable(e){
 		CURRENT_VARIABLE = "test_type";
 		conditionButton.select("rect").call(setUnpressedSize);
 		testTypeButton.select("rect").call(setPressedSize);
+		
+		var ledgendClass = d3.selectAll(".ledgendTest").attr("class");
+		ledgendClass = ledgendClass.substring(0,(ledgendClass.indexOf("hidden")-1));
+		d3.select(".ledgendTest").attr("class",ledgendClass);		
+		var ledgendClass = d3.selectAll(".ledgendCondition").attr("class");
+		ledgendClass = ledgendClass + " hidden";
+		d3.select(".ledgendCondition").attr("class",ledgendClass);
+		
 		changed = true;
 	}
 	else if (e.name == "condition" && CURRENT_VARIABLE != "condition") {
 		CURRENT_VARIABLE = "condition";
 		testTypeButton.select("rect").call(setUnpressedSize);
 		conditionButton.select("rect").call(setPressedSize);
+		
+		var ledgendClass = d3.selectAll(".ledgendCondition").attr("class");
+		ledgendClass = ledgendClass.substring(0,(ledgendClass.indexOf("hidden")-1));
+		d3.select(".ledgendCondition").attr("class",ledgendClass);		
+		var ledgendClass = d3.selectAll(".ledgendTest").attr("class");
+		ledgendClass = ledgendClass + " hidden";
+		d3.select(".ledgendTest").attr("class",ledgendClass);
+		
 		changed = true;
 	}
 	
@@ -901,7 +986,7 @@ function switchVariable(e){
 }
 
 // Make buttons to switch between "test type" and "condition"
-testTypeButton = svg.append("g")
+testTypeButton = variableButtonsSidebar.append("g")
 	.attr("class", "buttonHolder")
 	.attr("transform", "translate(" + 900 + "," + (1.5*buttonHeight*3) + ")");
 testTypeButton.append("rect")
@@ -916,7 +1001,7 @@ testTypeButton.append("text")
 	.text("Test Type");
 testTypeButton.select("rect").attr("class", "switch pressed");
 
-conditionButton = svg.append("g")
+conditionButton = variableButtonsSidebar.append("g")
 	.attr("class", "buttonHolder")
 	.attr("transform", "translate(" + (900+110) + "," + (1.5*buttonHeight*3) + ")");
 conditionButton.append("rect")
@@ -930,6 +1015,39 @@ conditionButton.append("text")
 	.attr("transform", "translate(" + buttonWidth/5 + "," + buttonHeight/1.5 + ")")
 	.text("Condition");
 
+
 </script>
+<div class="sidebar">
+<p class="titleText">Which Variables Affect Learning Gains?</p>
+<p class="caption">This visualization displays data from the Enlearn Fall Trial. The goal of this visualization is to show correlations between student learning gains and behaviors such as the number of exercise and assessment problems solved and time on-task. Scatterplots of learning gains and six important variables are shown in the main panel. Below the scatterplots, a bar chart shows student performance on individual items in the currently selected test.</p>
+<p class="caption">We display bar chart data for four different tests: the Unit 2 pre-test, the Unit 2 post-test, the Unit 4 pre-test, and the Unit 4 post-test. To view data for a different test, select the appropriate button below.</p>
+</div>
+<div class="sidebarLow">
+<p class="caption">The data is divided by one of two variables: the type of test that the student received (version A or B) or the condition that the student was in (Tablet or Paper).  To view data divided by a different variable, select the appropriate button below.</p>
+</div>
+<div class="ledgend">
+	<table class="ledgendTest">
+		<tr>
+			<td class="caption">Test A:</td>
+			<td><div class="AColor"></div></td>
+		</tr>
+		<tr>
+			<td class="caption">Test B:</td>
+			<td><div class="BColor"></div></td>
+		</tr>
+	</table>
+</div>
+<div class="ledgend">
+	<table class="ledgendCondition hidden">
+		<tr>
+			<td class="caption">Tablet:</td>
+			<td><div class="tabletColor"></div></td>
+		</tr>
+		<tr>
+			<td class="caption">Paper:</td>
+			<td><div class="paperColor"></div></td>
+		</tr>
+	</table>
+</div>
 </body>
 </html>
