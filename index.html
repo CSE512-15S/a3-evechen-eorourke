@@ -6,24 +6,24 @@
 		<style>
 		
 		svg {
-			position: fixed;
+			position: absolute;
 		}
 		.sidebar {
-			position: fixed;
+			position: absolute;
 			top: 0px;
 			left: 900px;
 			width: 400px;
 		}
 		
 		.sidebarLow {
-			position: fixed;
+			position: absolute;
 			top: 330px;
 			left: 900px;
 			width: 400px;
 		}
 		
-		.ledgend {
-			position: fixed;
+		.legend {
+			position: absolute;
 			top: 480px;
 			left: 900px;
 		}
@@ -576,31 +576,57 @@ barsholder.append("g")
    .attr("height", problemSelectorHeight)
 
 // Add the "Select All" and "Deselect All" buttons
-var selectAllButton = svg.append("g")
+var selectAllAButton = svg.append("g")
 	.attr("class", "buttonHolder")
 	.attr("transform", "translate(" + 1120 + "," + barsholderY + ")");
-selectAllButton.append("rect")
+selectAllAButton.append("rect")
 	.attr("class", "switch unpressed")
 	.attr("width", buttonWidth)
 	.attr("height", buttonHeight)
 	.on("click", function(){selectAll();});
-selectAllButton.append("text")
+selectAllAButton.append("text")
 	.attr("class", "buttonText")
 	.attr("transform", "translate(" + buttonWidth/5 + "," + buttonHeight/1.5 + ")")
-	.text("Select All");
+	.text("Select All A");
 
-var deselectAllButton = svg.append("g")
+var deselectAllAButton = svg.append("g")
 	.attr("class", "buttonHolder")
 	.attr("transform", "translate(" + 1120 + "," + (barsholderY + 1.5*buttonHeight) + ")");
-deselectAllButton.append("rect")
+deselectAllAButton.append("rect")
 	.attr("class", "switch unpressed")
 	.attr("width", buttonWidth)
 	.attr("height", buttonHeight)
 	.on("click", function(){deselectAll();});
-deselectAllButton.append("text")
+deselectAllAButton.append("text")
 	.attr("class", "buttonText")
 	.attr("transform", "translate(" + ((buttonWidth/5)-10) + "," + buttonHeight/1.5 + ")")
-	.text("Deselect All");
+	.text("Deselect All A");
+	
+var selectAllBButton = svg.append("g")
+	.attr("class", "buttonHolder")
+	.attr("transform", "translate(" + 1120 + "," + (barsholderY + 2.5*buttonHeight) + ")");
+selectAllBButton.append("rect")
+	.attr("class", "switch unpressed")
+	.attr("width", buttonWidth)
+	.attr("height", buttonHeight)
+	.on("click", function(){selectAll();});
+selectAllBButton.append("text")
+	.attr("class", "buttonText")
+	.attr("transform", "translate(" + buttonWidth/5 + "," + buttonHeight/1.5 + ")")
+	.text("Select All B");
+
+var deselectAllBButton = svg.append("g")
+	.attr("class", "buttonHolder")
+	.attr("transform", "translate(" + 1120 + "," + (barsholderY + 3.5*buttonHeight) + ")");
+deselectAllBButton.append("rect")
+	.attr("class", "switch unpressed")
+	.attr("width", buttonWidth)
+	.attr("height", buttonHeight)
+	.on("click", function(){deselectAll();});
+deselectAllBButton.append("text")
+	.attr("class", "buttonText")
+	.attr("transform", "translate(" + ((buttonWidth/5)-10) + "," + buttonHeight/1.5 + ")")
+	.text("Deselect All B");
 
 // Object to hold information about the currently selected bars (only used when not all bars are selected)
 var selectedBars = [];
@@ -939,12 +965,12 @@ function switchVariable(e){
 		conditionButton.select("rect").call(setUnpressedSize);
 		testTypeButton.select("rect").call(setPressedSize);
 		
-		var ledgendClass = d3.selectAll(".ledgendTest").attr("class");
-		ledgendClass = ledgendClass.substring(0,(ledgendClass.indexOf("hidden")-1));
-		d3.select(".ledgendTest").attr("class",ledgendClass);		
-		var ledgendClass = d3.selectAll(".ledgendCondition").attr("class");
-		ledgendClass = ledgendClass + " hidden";
-		d3.select(".ledgendCondition").attr("class",ledgendClass);
+		var legendClass = d3.selectAll(".legendTest").attr("class");
+		legendClass = legendClass.substring(0,(legendClass.indexOf("hidden")-1));
+		d3.select(".legendTest").attr("class",legendClass);		
+		var legendClass = d3.selectAll(".legendCondition").attr("class");
+		legendClass = legendClass + " hidden";
+		d3.select(".legendCondition").attr("class",legendClass);
 		
 		changed = true;
 	}
@@ -953,12 +979,12 @@ function switchVariable(e){
 		testTypeButton.select("rect").call(setUnpressedSize);
 		conditionButton.select("rect").call(setPressedSize);
 		
-		var ledgendClass = d3.selectAll(".ledgendCondition").attr("class");
-		ledgendClass = ledgendClass.substring(0,(ledgendClass.indexOf("hidden")-1));
-		d3.select(".ledgendCondition").attr("class",ledgendClass);		
-		var ledgendClass = d3.selectAll(".ledgendTest").attr("class");
-		ledgendClass = ledgendClass + " hidden";
-		d3.select(".ledgendTest").attr("class",ledgendClass);
+		var legendClass = d3.selectAll(".legendCondition").attr("class");
+		legendClass = legendClass.substring(0,(legendClass.indexOf("hidden")-1));
+		d3.select(".legendCondition").attr("class",legendClass);		
+		var legendClass = d3.selectAll(".legendTest").attr("class");
+		legendClass = legendClass + " hidden";
+		d3.select(".legendTest").attr("class",legendClass);
 		
 		changed = true;
 	}
@@ -1012,8 +1038,8 @@ conditionButton.append("text")
 <div class="sidebarLow">
 <p class="caption">The data is divided by one of two variables: the type of test that the student received (version A or B) or the condition that the student was in (Tablet or Paper).  To view data divided by a different variable, select the appropriate button below.</p>
 </div>
-<div class="ledgend">
-	<table class="ledgendTest">
+<div class="legend">
+	<table class="legendTest">
 		<tr>
 			<td class="caption">Test A:</td>
 			<td><div class="AColor"></div></td>
@@ -1024,8 +1050,8 @@ conditionButton.append("text")
 		</tr>
 	</table>
 </div>
-<div class="ledgend">
-	<table class="ledgendCondition hidden">
+<div class="legend">
+	<table class="legendCondition hidden">
 		<tr>
 			<td class="caption">Tablet:</td>
 			<td><div class="tabletColor"></div></td>
