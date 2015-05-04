@@ -21,23 +21,23 @@
 			opacity: 0.0;
 		}
 		
-		.bar{
-			stroke-width: 2;
-		}
         
         .hitArea{
             fill:none;
             pointer-events: all;
         }
 
-        .hitArea:hover + rect{
-            stroke: black;
-        }
-        
-		rect.bar:hover{
-			stroke: black;
+		
+		.A.bar.selected, .B.bar.selected{
+			stroke-width: 2;
 		}
-
+		
+		.bar.unselected{
+			fill: #F0F0F0;
+			stroke: #999999;
+			stroke-width:1;
+		}	
+		
 		.A.correct.selected{
 			fill: #FFA500;
 			stroke: #FFA500;
@@ -58,29 +58,18 @@
 			stroke: #D5D8E4;
 		}
 		
-		.A.correct.unselected{
-			fill: #DDDDDD;
-			stroke: #999999;
-			stroke-width: 1;
+		.A.bar:hover, .B.bar:hover{
+			stroke: black;
+		}
+
+        .hitArea:hover + rect.bar{
+            stroke: black;
+        }
+        
+		rect.bar:hover{
+			stroke: black;
 		}
 		
-		.B.correct.unselected{
-			fill: #DDDDDD;
-			stroke: #999999;
-			stroke-width: 1;
-		}
-		
-		.A.incorrect.unselected{
-			fill: #DDDDDD;
-			stroke: #999999;
-			stroke-width: 1;
-		}
-		
-		.B.incorrect.unselected{
-			fill: #DDDDDD;
-			stroke: #999999;
-			stroke-width: 1;
-		}
 				
 		.switch.unpressed{
 			fill: #D3D3D3;
@@ -161,6 +150,8 @@ var barMargin = {top: 10, right: 10, bottom: 10, left: 10};
 var barStrokeWidth = 2;
 var barHitVert = 10; //extra hit area padding for top or bottom
 var barHitHor = 10; //extra hit area padding for left or right
+var labelPadding = 20; //distance between bottom of bars and the question # labels
+
 var allBarsSelected = true;
 
 var buttonHeight = 20, 
@@ -561,56 +552,70 @@ function drawProblemBars(){
 							//simplify selection for pre/post
 							var corr = CURRENT_PREPOST + " Correct";
 							var incorr = CURRENT_PREPOST + " Incorrect";
+							
+							barsholder.select(".correctBars" + this.key)
+									.selectAll("g")
+									.remove();
 
 							var correctBars = barsholder.select(".correctBars" + this.key)
-									.selectAll("rect")
-									.data(this.values);																
-							correctBars.enter().append("rect");
+									.selectAll("g")
+									.data(this.values);
+																									
+							correctBars.enter().append("g");
 						
 							//must draw hitArea before actual bar for CSS next sibling selector to work            
-							// correctBars
-							// 	.append("rect")
-							// 	.data(this.values)
-							// 		.attr("class", " hitArea")
-							// 		.attr("x", function(d, i) { return (-1*barHitHor + j*barHitHor) + (j*(barStrokeWidth + barWidth))+i*(barSpacing); })
-							// 		.attr("y", function(d){ return barsY(+d[corr]/(+d[corr]+(+d[incorr])));})
-							// 		.attr("width", barWidth + barHitHor)
-							// 		.attr("height", function(d) {return barHitVert + barStrokeWidth + problemSelectorHeight - barsY(+d[corr]/(+d[corr]+(+d[incorr]))); });                                     
-						
+							 correctBars
+							 	.append("rect")
+							 	.data(this.values)
+							 		.attr("class", " hitArea")
+							 		.attr("x", function(d, i) { return (-1*barHitHor + j*barHitHor) + (j*(barStrokeWidth + barWidth))+i*(barSpacing); })
+							 		.attr("y", function(d){ return barsY(+d[corr]/(+d[corr]+(+d[incorr])));})
+							 		.attr("width", barWidth + barHitHor)
+							 		.attr("height", function(d) {return barHitVert + barStrokeWidth + problemSelectorHeight - barsY(+d[corr]/(+d[corr]+(+d[incorr]))); })                                     
+									.on("click", function(){onBarClick(this.parentNode.lastChild);}); //this is kind of hacky, but works for now bc we know exact structure of this part of the DOM
 							correctBars
-								.attr("class", this.key + " correct bar selected")
-								.attr("id", function(d) { return ("problem" + d["Question"]).replace(/\./g,"");})
-								.attr("x", function(d, i) { return (j*(barStrokeWidth + barWidth))+i*(barSpacing); })
-								.attr("width", barWidth)
-								.attr("y", function(d){ return barsY(+d[corr]/(+d[corr]+(+d[incorr])));})
-								.attr("height", function(d) {return barStrokeWidth + problemSelectorHeight - barsY(+d[corr]/(+d[corr]+(+d[incorr]))); })
-								.on("click", function(){onBarClick(this);});
+								.append("rect")
+									.data(this.values)
+									.attr("class", this.key + " correct bar selected")
+									.attr("id", function(d) { return ("problem" + d["Question"]).replace(/\./g,"");})
+									.attr("x", function(d, i) { return (j*(barStrokeWidth + barWidth))+i*(barSpacing); })
+									.attr("width", barWidth)
+									.attr("y", function(d){ return barsY(+d[corr]/(+d[corr]+(+d[incorr])));})
+									.attr("height", function(d) {return barStrokeWidth + problemSelectorHeight - barsY(+d[corr]/(+d[corr]+(+d[incorr]))); })
+									.on("click", function(){onBarClick(this);});
 							
 							correctBars.exit().remove();
+							
+							barsholder.select(".incorrectBars" + this.key)
+									.selectAll("g")
+									.remove();
 
 							var incorrectBars = barsholder.select(".incorrectBars" + this.key)
-									.selectAll("rect")
+									.selectAll("g")
 									.data(this.values);			
-							incorrectBars.enter().append("rect")
+							incorrectBars.enter().append("g")
 						
 							//must draw hitArea before actual bar for CSS next sibling selector to work            
-							// incorrectBars
-							// 	.append("rect")
-							// 	.data(this.values)
-							// 		.attr("class", " hitArea")
-							// 		.attr("x", function(d, i) { return (-1*barHitHor + j*barHitHor) + (j*(barStrokeWidth + barWidth))+i*(barSpacing); })
-							// 		.attr("y", -1*barHitVert)
-							// 		.attr("width", barWidth + barHitHor)
-							// 		.attr("height", function(d) {return barHitVert + Math.max(0, problemSelectorHeight - barsY(+d[incorr]/(+d[corr]+(+d[incorr])))); });                                     
+							 incorrectBars
+							 	.append("rect")
+							 	.data(this.values)
+							 		.attr("class", " hitArea")
+							 		.attr("x", function(d, i) { return (-1*barHitHor + j*barHitHor) + (j*(barStrokeWidth + barWidth))+i*(barSpacing); })
+							 		.attr("y", -1*barHitVert)
+							 		.attr("width", barWidth + barHitHor)
+							 		.attr("height", function(d) {return barHitVert + Math.max(0, problemSelectorHeight - barsY(+d[incorr]/(+d[corr]+(+d[incorr])))); })
+							 		.on("click", function(){onBarClick(this.parentNode.lastChild);});                                     
 						
 							incorrectBars
-								.attr("class", this.key + " incorrect bar selected")
-								.attr("id", function(d) { return ("problem" + d["Question"]).replace(/\./g,"");})
-								.attr("x", function(d, i) { return (j*(barStrokeWidth + barWidth))+i*(barSpacing); })
-								.attr("width", barWidth)
-								.attr("y", 0)
-								.attr("height", function(d) { return Math.max(0, problemSelectorHeight - barsY(+d[incorr]/(+d[corr]+(+d[incorr])))); })
-								.on("click", function(){onBarClick(this);});
+								.append("rect")
+									.data(this.values)
+									.attr("class", this.key + " incorrect bar selected")
+									.attr("id", function(d) { return ("problem" + d["Question"]).replace(/\./g,"");})
+									.attr("x", function(d, i) { return (j*(barStrokeWidth + barWidth))+i*(barSpacing); })
+									.attr("width", barWidth)
+									.attr("y", 0)
+									.attr("height", function(d) { return Math.max(0, problemSelectorHeight - barsY(+d[incorr]/(+d[corr]+(+d[incorr])))); })
+									.on("click", function(){onBarClick(this);});
 							
 							incorrectBars.exit().remove();		
 					   });
