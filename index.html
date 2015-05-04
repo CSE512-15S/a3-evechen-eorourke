@@ -179,6 +179,7 @@ var buttonHeight = 20,
     var CURRENT_UNIT = "2";
     var CURRENT_PREPOST= "Pre"; 
     var CURRENT_BUTTON = null;
+	var CURRENT_VARIABLE = "test_type";
     
     //the main SVG
     var svg = d3.select("body").append("svg")
@@ -527,90 +528,95 @@ function onBarClick(bar_object) {
 
 	   
 //TODO separate out drawing the gridlines and the bars like I did for the dots
-function drawProblemBars(){    
-d3.csv("problems2.csv", function(data){
-	problemsDataset = data.map(function(d){return d;});
+function drawProblemBars(){   
+	var problemsFile = "problems2.csv";
+	if (CURRENT_VARIABLE == "condition") {
+		problemsFile = "problems_condition.csv";
+	}
 	
-	// When you select a new unit and test, we want all the bars to start out selected
-	allBarsSelected = true;
-
-	//TODO create a wrapper for each bar that is its mouseover area
-	//.data([{selected: false}]) to store info about whether it is pressed or not
-	//add interactivity to bars 
-
-	//Nest by Unit
-	var groups = d3.nest()
-		 .key(function(d) { return d.Unit; })
-		 .key(function(d) { return d.Type; })
-		 .entries(data);
+	d3.csv("problems2.csv", function(data){
+		problemsDataset = data.map(function(d){return d;});
 	
-	//Select all rows of current unit
-	d3.selectAll(groups)
-		.each(function(d2, k){ 
-			if(this.key == CURRENT_UNIT){
-				//Map A and B separately for 4 groups of bars: A-correct, A-incorrect, B-correct, B-incorrect 
-				d3.selectAll(this.values)
-					.each(function(dat, j){
+		// When you select a new unit and test, we want all the bars to start out selected
+		allBarsSelected = true;
 
-						//simplify selection for pre/post
-						var corr = CURRENT_PREPOST + " Correct";
-						var incorr = CURRENT_PREPOST + " Incorrect";
+		//TODO create a wrapper for each bar that is its mouseover area
+		//.data([{selected: false}]) to store info about whether it is pressed or not
+		//add interactivity to bars 
 
-						var correctBars = barsholder.select(".correctBars" + this.key)
-								.selectAll("rect")
-								.data(this.values);																
-						correctBars.enter().append("rect");
+		//Nest by Unit
+		var groups = d3.nest()
+			 .key(function(d) { return d.Unit; })
+			 .key(function(d) { return d.Type; })
+			 .entries(data);
+	
+		//Select all rows of current unit
+		d3.selectAll(groups)
+			.each(function(d2, k){ 
+				if(this.key == CURRENT_UNIT){
+					//Map A and B separately for 4 groups of bars: A-correct, A-incorrect, B-correct, B-incorrect 
+					d3.selectAll(this.values)
+						.each(function(dat, j){
+
+							//simplify selection for pre/post
+							var corr = CURRENT_PREPOST + " Correct";
+							var incorr = CURRENT_PREPOST + " Incorrect";
+
+							var correctBars = barsholder.select(".correctBars" + this.key)
+									.selectAll("rect")
+									.data(this.values);																
+							correctBars.enter().append("rect");
 						
-						//must draw hitArea before actual bar for CSS next sibling selector to work            
-						// correctBars
-						// 	.append("rect")
-						// 	.data(this.values)
-						// 		.attr("class", " hitArea")
-						// 		.attr("x", function(d, i) { return (-1*barHitHor + j*barHitHor) + (j*(barStrokeWidth + barWidth))+i*(barSpacing); })
-						// 		.attr("y", function(d){ return barsY(+d[corr]/(+d[corr]+(+d[incorr])));})
-						// 		.attr("width", barWidth + barHitHor)
-						// 		.attr("height", function(d) {return barHitVert + barStrokeWidth + problemSelectorHeight - barsY(+d[corr]/(+d[corr]+(+d[incorr]))); });                                     
+							//must draw hitArea before actual bar for CSS next sibling selector to work            
+							// correctBars
+							// 	.append("rect")
+							// 	.data(this.values)
+							// 		.attr("class", " hitArea")
+							// 		.attr("x", function(d, i) { return (-1*barHitHor + j*barHitHor) + (j*(barStrokeWidth + barWidth))+i*(barSpacing); })
+							// 		.attr("y", function(d){ return barsY(+d[corr]/(+d[corr]+(+d[incorr])));})
+							// 		.attr("width", barWidth + barHitHor)
+							// 		.attr("height", function(d) {return barHitVert + barStrokeWidth + problemSelectorHeight - barsY(+d[corr]/(+d[corr]+(+d[incorr]))); });                                     
 						
-						correctBars
-							.attr("class", this.key + " correct bar selected")
-							.attr("id", function(d) { return ("problem" + d["Question"]).replace(/\./g,"");})
-							.attr("x", function(d, i) { return (j*(barStrokeWidth + barWidth))+i*(barSpacing); })
-							.attr("width", barWidth)
-							.attr("y", function(d){ return barsY(+d[corr]/(+d[corr]+(+d[incorr])));})
-							.attr("height", function(d) {return barStrokeWidth + problemSelectorHeight - barsY(+d[corr]/(+d[corr]+(+d[incorr]))); })
-							.on("click", function(){onBarClick(this);});
+							correctBars
+								.attr("class", this.key + " correct bar selected")
+								.attr("id", function(d) { return ("problem" + d["Question"]).replace(/\./g,"");})
+								.attr("x", function(d, i) { return (j*(barStrokeWidth + barWidth))+i*(barSpacing); })
+								.attr("width", barWidth)
+								.attr("y", function(d){ return barsY(+d[corr]/(+d[corr]+(+d[incorr])));})
+								.attr("height", function(d) {return barStrokeWidth + problemSelectorHeight - barsY(+d[corr]/(+d[corr]+(+d[incorr]))); })
+								.on("click", function(){onBarClick(this);});
 							
-						correctBars.exit().remove();
+							correctBars.exit().remove();
 
-						var incorrectBars = barsholder.select(".incorrectBars" + this.key)
-								.selectAll("rect")
-								.data(this.values);			
-						incorrectBars.enter().append("rect")
+							var incorrectBars = barsholder.select(".incorrectBars" + this.key)
+									.selectAll("rect")
+									.data(this.values);			
+							incorrectBars.enter().append("rect")
 						
-						//must draw hitArea before actual bar for CSS next sibling selector to work            
-						// incorrectBars
-						// 	.append("rect")
-						// 	.data(this.values)
-						// 		.attr("class", " hitArea")
-						// 		.attr("x", function(d, i) { return (-1*barHitHor + j*barHitHor) + (j*(barStrokeWidth + barWidth))+i*(barSpacing); })
-						// 		.attr("y", -1*barHitVert)
-						// 		.attr("width", barWidth + barHitHor)
-						// 		.attr("height", function(d) {return barHitVert + Math.max(0, problemSelectorHeight - barsY(+d[incorr]/(+d[corr]+(+d[incorr])))); });                                     
+							//must draw hitArea before actual bar for CSS next sibling selector to work            
+							// incorrectBars
+							// 	.append("rect")
+							// 	.data(this.values)
+							// 		.attr("class", " hitArea")
+							// 		.attr("x", function(d, i) { return (-1*barHitHor + j*barHitHor) + (j*(barStrokeWidth + barWidth))+i*(barSpacing); })
+							// 		.attr("y", -1*barHitVert)
+							// 		.attr("width", barWidth + barHitHor)
+							// 		.attr("height", function(d) {return barHitVert + Math.max(0, problemSelectorHeight - barsY(+d[incorr]/(+d[corr]+(+d[incorr])))); });                                     
 						
-						incorrectBars
-							.attr("class", this.key + " incorrect bar selected")
-							.attr("id", function(d) { return ("problem" + d["Question"]).replace(/\./g,"");})
-							.attr("x", function(d, i) { return (j*(barStrokeWidth + barWidth))+i*(barSpacing); })
-							.attr("width", barWidth)
-							.attr("y", 0)
-							.attr("height", function(d) { return Math.max(0, problemSelectorHeight - barsY(+d[incorr]/(+d[corr]+(+d[incorr])))); })
-							.on("click", function(){onBarClick(this);});
+							incorrectBars
+								.attr("class", this.key + " incorrect bar selected")
+								.attr("id", function(d) { return ("problem" + d["Question"]).replace(/\./g,"");})
+								.attr("x", function(d, i) { return (j*(barStrokeWidth + barWidth))+i*(barSpacing); })
+								.attr("width", barWidth)
+								.attr("y", 0)
+								.attr("height", function(d) { return Math.max(0, problemSelectorHeight - barsY(+d[incorr]/(+d[corr]+(+d[incorr])))); })
+								.on("click", function(){onBarClick(this);});
 							
-						incorrectBars.exit().remove();		
-				   });
-			}
-		});		
-});
+							incorrectBars.exit().remove();		
+					   });
+				}
+			});		
+	});
 }
 drawProblemBars();
 
@@ -695,6 +701,66 @@ for(var x = 0; x < buttonNames.length; x++){
 }
 
 buttons[buttonNames[0]].select("rect").attr("class", "switch pressed");
+
+
+// Switch variable buttons
+var testTypeButton;
+var conditionButton;
+
+// Function that switches variable
+function switchVariable(e){
+	var changed = false;
+	if (e.name == "test_type" && CURRENT_VARIABLE != "test_type") {
+		CURRENT_VARIABLE = "test_type";
+		conditionButton.select("rect").call(setUnpressedSize);
+		testTypeButton.select("rect").call(setPressedSize);
+		changed = true;
+	}
+	else if (e.name == "condition" && CURRENT_VARIABLE != "condition") {
+		CURRENT_VARIABLE = "condition";
+		testTypeButton.select("rect").call(setUnpressedSize);
+		conditionButton.select("rect").call(setPressedSize);
+		changed = true;
+	}
+	
+	if (changed) {
+		// drawProblemBars();
+		// // reset the dot selection before drawing dots
+		// allBarsSelected = true;
+		// selectedBars = [];
+		// drawDots();
+	}
+}
+
+// Make buttons to switch between "test type" and "condition"
+testTypeButton = svg.append("g")
+	.attr("class", "buttonHolder")
+	.attr("transform", "translate(" + 900 + "," + (1.5*buttonHeight*3) + ")");
+testTypeButton.append("rect")
+	.data([{name: "test_type"}])
+	.attr("class", "switch unpressed")
+	.attr("width", buttonWidth)
+	.attr("height", buttonHeight)
+	.on("click", function(e){switchVariable(e);});
+testTypeButton.append("text")
+	.attr("class", "buttonText")
+	.attr("transform", "translate(" + buttonWidth/5 + "," + buttonHeight/1.5 + ")")
+	.text("Test Type");
+testTypeButton.select("rect").attr("class", "switch pressed");
+
+conditionButton = svg.append("g")
+	.attr("class", "buttonHolder")
+	.attr("transform", "translate(" + (900+110) + "," + (1.5*buttonHeight*3) + ")");
+conditionButton.append("rect")
+	.data([{name: "condition"}])
+	.attr("class", "switch unpressed")
+	.attr("width", buttonWidth)
+	.attr("height", buttonHeight)
+	.on("click", function(e){switchVariable(e);});
+conditionButton.append("text")
+	.attr("class", "buttonText")
+	.attr("transform", "translate(" + buttonWidth/5 + "," + buttonHeight/1.5 + ")")
+	.text("Condition");
 
 </script>
 </body>
