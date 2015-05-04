@@ -5,12 +5,24 @@
 		<title>What Affects Learning Gains?</title>
 		<style>
 
+		.hidden {
+			visibility: hidden;
+		}
+		
 		.A.dot{
 			fill: #FFA500;
 		}
 		
 		.B.dot{
 			fill: #4169E1;
+		}
+		
+		.paper.dot{
+			fill: #af8dc3;
+		}
+		
+		.tablet.dot{
+			fill: #7fbf7b;
 		}
 		
 		.dot.unselected {
@@ -37,7 +49,51 @@
 			stroke: #999999;
 			stroke-width:1;
 		}	
+
+		.paper.correct.selected{
+			fill: #af8dc3;
+			stroke: #af8dc3;
+		}
 		
+		.tablet.correct.selected{
+			fill: #7fbf7b;
+			stroke: #7fbf7b;
+		}
+		
+		.paper.incorrect.selected{
+			fill: #e7d4e8;
+			stroke: #e7d4e8;
+		}
+		
+		.tablet.incorrect.selected{
+			fill: #d9f0d3;
+			stroke: #d9f0d3;
+		}
+		
+		.paper.correct.unselected{
+			fill: #DDDDDD;
+			stroke: #999999;
+			stroke-width: 1;
+		}
+		
+		.tablet.correct.unselected{
+			fill: #DDDDDD;
+			stroke: #999999;
+			stroke-width: 1;
+		}
+		
+		.paper.incorrect.unselected{
+			fill: #DDDDDD;
+			stroke: #999999;
+			stroke-width: 1;
+		}
+		
+		.tablet.incorrect.unselected{
+			fill: #DDDDDD;
+			stroke: #999999;
+			stroke-width: 1;
+		}
+
 		.A.correct.selected{
 			fill: #FFA500;
 			stroke: #FFA500;
@@ -272,24 +328,39 @@ function drawDots(){
 				.attr("r", 1.5);
 			
 			dots.attr("class", function(d) {
-						var t = d["Unit " + CURRENT_UNIT + " Pre-Test Type"].toUpperCase();
-						if(CURRENT_PREPOST == "Post"){
-							if(t == "A")
-								t == "B";
-							else if(t == "B")
-								t == "A";
+						if (CURRENT_VARIABLE == "test_type") {
+							var t = d["Unit " + CURRENT_UNIT + " Pre-Test Type"].toUpperCase();
+							if(CURRENT_PREPOST == "Post"){
+								if(t == "A")
+									t = "B";
+								else if(t == "B")
+									t = "A";
+								else
+									t = "unknown";
+							}
+							if (t == "")
+								t = "unknown";
+
+							var dotSelection = "selected";
+							if (!allBarsSelected) {
+								dotSelection = setDotSelection(d, t);
+							}
+							if(t == "A" || t == "B")
+								return t + " dot " + dotSelection;
 							else
-								t == "unknown";
+								return "unknown dot " + dotSelection;
 						}
-						
-						var dotSelection = "selected";
-						if (!allBarsSelected) {
-							dotSelection = setDotSelection(d, t);
+						else {
+							var t = d["Condition"];
+							var dotSelection = "selected";
+							if (!allBarsSelected) {
+								dotSelection = setDotSelection(d, t);
+							}
+							if(t == "tablet" || t == "paper")
+								return t + " dot " + dotSelection;
+							else
+								return "unknown dot " + dotSelection;
 						}
-						if(t == "A" || t == "B")
-							return t + " dot " + dotSelection;
-						else
-							return "unknown dot " + dotSelection;
 					})
 				.attr("transform", function(d) { 
 							var gains = d["Unit " + CURRENT_UNIT + " Learning Gain"];
@@ -311,7 +382,8 @@ function setDotSelection(dotData, dotType) {
 	var selected = false;
 	
 	for(var i = 0; i < selectedBars.length; i++) {
-		var barData = selectedBars[i];		
+		var barData = selectedBars[i];
+		dotType = dotType[0];
 		if (dotType == barData.test_type) {
 			var key;
 			if (CURRENT_UNIT == 2 && CURRENT_PREPOST == "Pre") {
@@ -433,6 +505,58 @@ barsholder.append("g")
    .attr("width", width)
    .attr("height", problemSelectorHeight)
 
+//Container for Conditions
+var barsholderCondition = svg.append("g")
+	.attr("class", "barsHolderCondition hidden")
+	.attr("width", width)
+	.attr("height", problemSelectorHeight)
+	.attr("transform", "translate(" + barsholderX + "," + barsholderY + ")");
+
+   //TODO alter the range based on actual learning gains range?
+var barsY = d3.scale.linear()
+	.domain([0, 1])
+	.range([100+barStrokeWidth, 0]); 
+
+var barsYAxis = d3.svg.axis()
+	.scale(barsY)
+	.orient("left")
+	.ticks(2, "%");	
+
+//Y Axis, percentage
+barsholderCondition.append("g")
+	  .attr("class", "axis")
+	  .call(barsYAxis)
+	.append("text")
+	  .attr("transform", "rotate(-90)")
+	  .attr("y", 0 - margin.left)
+	  .attr("x",0 - (problemSelectorHeight / 2))
+	  .attr("dy", "0.8em")
+	  .style("text-anchor", "middle")
+	  .text("% Correct");
+
+//TODO clean this part up a bit? forloop + array for class names, maybe
+//Holders for correct bars
+barsholderCondition.append("g")
+   .attr("class", "correctBarspaper oneBarTypeHolder")
+   .attr("width", width)
+   .attr("height", problemSelectorHeight)
+
+barsholderCondition.append("g")
+   .attr("class", "correctBarstablet oneBarTypeHolder")
+   .attr("width", width)
+   .attr("height", problemSelectorHeight)
+
+//Holders for incorrect bars
+barsholderCondition.append("g")
+   .attr("class", "incorrectBarspaper oneBarTypeHolder")
+   .attr("width", width)
+   .attr("height", problemSelectorHeight)
+
+barsholderCondition.append("g")
+   .attr("class", "incorrectBarstablet oneBarTypeHolder")
+   .attr("width", width)
+   .attr("height", problemSelectorHeight)
+
 // Add the "Select All" and "Deselect All" buttons
 var selectAllButton = svg.append("g")
 	.attr("class", "buttonHolder")
@@ -517,15 +641,45 @@ function onBarClick(bar_object) {
 	drawDots();
 }
 
+function setBarHolderVisibility() {
+	if (CURRENT_VARIABLE == "test_type") {		
+		// hide condition holder
+		var holder_class = d3.select(".barsHolderCondition").attr("class");
+		if (holder_class.indexOf("hidden") < 0) {
+			holder_class = holder_class + " hidden";
+			d3.select(".barsHolderCondition").attr("class", holder_class);
+		}
+		// show test holder
+		var holder_class = d3.select(".barsHolder").attr("class");
+		if (holder_class.indexOf("hidden") > 0) {
+			holder_class = holder_class.substring(0, (holder_class.indexOf("hidden")-1));
+			d3.select(".barsHolder").attr("class", holder_class);
+		}
+	}
+	else {
+		// hide test holder
+		var holder_class = d3.select(".barsHolder").attr("class");
+		if (holder_class.indexOf("hidden") < 0) {
+			holder_class = holder_class + " hidden";
+			d3.select(".barsHolder").attr("class", holder_class);
+		}
+		// show condition holder
+		var holder_class = d3.select(".barsHolderCondition").attr("class");
+		if (holder_class.indexOf("hidden") > 0) {
+			holder_class = holder_class.substring(0, (holder_class.indexOf("hidden")-1));
+			d3.select(".barsHolderCondition").attr("class", holder_class);
+		}
+	}
+}
 	   
 //TODO separate out drawing the gridlines and the bars like I did for the dots
-function drawProblemBars(){   
+function drawProblemBars(){
 	var problemsFile = "problems2.csv";
 	if (CURRENT_VARIABLE == "condition") {
 		problemsFile = "problems_condition.csv";
 	}
 	
-	d3.csv("problems2.csv", function(data){
+	d3.csv(problemsFile, function(data){
 		problemsDataset = data.map(function(d){return d;});
 	
 		// When you select a new unit and test, we want all the bars to start out selected
@@ -540,6 +694,15 @@ function drawProblemBars(){
 			 .key(function(d) { return d.Unit; })
 			 .key(function(d) { return d.Type; })
 			 .entries(data);
+		if (CURRENT_VARIABLE == "condition") {
+			var groups = d3.nest()
+				 .key(function(d) { return d.Unit; })
+				 .key(function(d) { return d.Condition; })
+				 .entries(data);
+			console.log("groups: " + groups);
+		}
+		
+		setBarHolderVisibility();
 	
 		//Select all rows of current unit
 		d3.selectAll(groups)
@@ -729,11 +892,11 @@ function switchVariable(e){
 	}
 	
 	if (changed) {
-		// drawProblemBars();
-		// // reset the dot selection before drawing dots
-		// allBarsSelected = true;
-		// selectedBars = [];
-		// drawDots();
+		 drawProblemBars();
+		// reset the dot selection before drawing dots
+		allBarsSelected = true;
+		selectedBars = [];
+		drawDots();
 	}
 }
 
