@@ -156,7 +156,7 @@ var width = (10*graphWidth) + (8*margin.left),
 var defaultRange = [0, graphWidth]; //for visual mapping, so should be same for all graphs?
 
 var barWidth = 10;
-var barSpacing = (barWidth*2) + 20;
+var barSpacing = (barWidth*2) + 15;
 var barMargin = {top: 10, right: 10, bottom: 10, left: 10};
 var barStrokeWidth = 2;
 var barHitVert = 10; //extra hit area padding for top or bottom
@@ -445,7 +445,7 @@ barsholder.append("g")
 // Add the "Select All" and "Deselect All" buttons
 var selectAllButton = svg.append("g")
 	.attr("class", "buttonHolder")
-	.attr("transform", "translate(" + 1250 + "," + barsholderY + ")");
+	.attr("transform", "translate(" + 1120 + "," + barsholderY + ")");
 selectAllButton.append("rect")
 	.attr("class", "switch unpressed")
 	.attr("width", buttonWidth)
@@ -458,7 +458,7 @@ selectAllButton.append("text")
 
 var deselectAllButton = svg.append("g")
 	.attr("class", "buttonHolder")
-	.attr("transform", "translate(" + 1250 + "," + (barsholderY + 1.5*buttonHeight) + ")");
+	.attr("transform", "translate(" + 1120 + "," + (barsholderY + 1.5*buttonHeight) + ")");
 deselectAllButton.append("rect")
 	.attr("class", "switch unpressed")
 	.attr("width", buttonWidth)
