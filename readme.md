@@ -4,7 +4,7 @@ a3-evechen-eorourke
 ## Team Members
 
 1. Yvonne Chen evechen@uw.edu
-2. Nell O'Rourke emor@u.washington.edu
+2. Nell O'Rourke eorourke@cs.washington.edu
 
 ## Data Visualization: Assignment 3
 
@@ -15,18 +15,11 @@ a3-evechen-eorourke
 ##Final DesignOur interactive visualization provides an environment for exploring the data from the Enlearn Fall Trial.  The visualization includes one central data view, which shows six scatterplots and a stacked bar chart.  The scatterplots display the relationship between student learning gains and six different behavioral factors such as exercise problems solved and percentage of time spent on-task. The bar chart shows student performance on individual items in an assessment test.Buttons to the right of the screen allow the user to select from four different tests. When a new button is clicked, the bar chart updates to display the data for the associated test, and the dots in the scatterplot are re-colored.  The scatterplots’ y-axis shows student learning gains for the current unit.  Learning gains will differ between Unit 2 and Unit 4, so if the user selects a new unit, the y-axis will change to reflect the appropriate learning gains.We also allow the user to select which variable to examine, either grouping students by the test type they took (A vs B), or the experimental condition they belonged to (Tablet vs Paper).
 
 ## Running Instructions
-
-Put your running instructions here. (Tell us how to run your visualization.) 
-
-If your visualization is web-based,  it would be great if your submission can be opened online. [Github Pages](http://pages.github.com/) is a good and easy way to put your visualization online so you can put your link here.  For example:
-
-Access our visualization at [dasdsasd] or download this repository and run `python -m SimpleHTTPServer 8000` and access this from http://localhost:8000/.
-
-If you put your work online, please also write a [one-line description and add a link to your final work](http://note.io/1n3u46s) so people can access it directly from the CSE512-15S page.
+Access our visualization at http://cse512-15s.github.io/a3-evechen-eorourke/  or download this repository and run `python -m SimpleHTTPServer 8000` and access this from http://localhost:8000/.
 
 ## Story Board
 
-[Click here to view storyboard](storyboard.pdf?raw=true).
+[Click here to view our storyboard](storyboard.pdf?raw=true).
 
 ### Changes between Storyboard and the Final Implementation
 
