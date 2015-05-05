@@ -752,7 +752,7 @@ function onBarClick(bar_object) {
 	var i = bar_object.getAttribute("id");
 	i = i.substring(7);
 	q = i[0];
-	if (q != "4") {
+	if (i.length > 1) {
 		q = q + "." + i.substring(1);
 	}
 	
