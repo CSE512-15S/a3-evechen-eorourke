@@ -58,10 +58,14 @@ DONE
 - incorrect bar alignment issue
 - clicking tiny bars??
 
-
-
 After Nell is done:
 - graph title
 - change select button text based on whether we are doing A/B or tablet/paper
 - toggle select/deselect?
 - negative AP percentages??
+
+-------
+Add breakdowns by school and classroom
+Think about how to color code those...
+maybe 2 rows of graphs and buttons to scroll the graph
+- condition button is meaningless if we select schools
