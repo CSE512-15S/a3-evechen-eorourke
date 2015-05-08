@@ -432,8 +432,11 @@ function drawDots(){
 							else
 								return "translate(" + x(cat) + "," + yScale(+gains) + ")";
 						})
-				.attr("opacity", function(d){ return isNaN(d["Unit " + CURRENT_UNIT + " Learning Gain"]) ? 0.0 : 1.0;})
-			
+					.attr("opacity", function(d){ 
+						var gains = d["Unit " + CURRENT_UNIT + " Learning Gain"];
+						var cat = +d[graphParams[i]];
+						return (isNaN(gains) || isNaN(cat)) ? 0.0 : 1.0;
+					})			
 			dots.exit()
 				.remove();
 	});

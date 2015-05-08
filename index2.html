@@ -725,18 +725,6 @@ function drawDots(){
 					.attr("opacity", function(d){ 
 						var gains = d["Unit " + CURRENT_UNIT + " Learning Gain"];
 						var cat = +d[currentShown[i]];
-						
-						/*var sc = CURRENT_ROW1.data()[0].school;
-						var per = CURRENT_ROW1.data()[0].period;
-						var row = CURRENT_ROW1.data()[0].row;
-						console.log(sc);
-						
-						if(z == 2){
-							sc = CURRENT_ROW2.data()[0].school;
-							per = CURRENT_ROW2.data()[0].period;
-							row = CURRENT_ROW2.data()[0].row;						
-						}*/
-	
 						return (isNaN(gains) || isNaN(cat)) ? 0.0 : 1.0;
 					})
 
@@ -788,9 +776,9 @@ function drawGraphs() {
 		
 		//Assign loaded data to variables
 		studentDataset = data.map(function(d){return d;});
-		graphParams = d3.keys(data[0]).slice(14, 20); //only select the 6 parameters we want to make graphs for
+		graphParams = d3.keys(data[0]).slice(9, 21); //only select the parameters we want to make graphs for 
 
-		d3.selectAll(graphParams)
+		d3.selectAll(graphParams.slice(0,3))
 			.each(function(d, i) {	
 				for(var x = 1; x <= 2; x++){
 					// Create the graph container
