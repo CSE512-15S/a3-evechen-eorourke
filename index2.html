@@ -280,7 +280,8 @@ var buttonHeight = 20,
  	//Holds data from CSV files
  	var conditions = [];
 	var graphParams = [];
-    var studentDataset = [];
+    var studentDatasetUnit2 = [];
+    var studentDatasetUnit4 = [];
     var problemsDataset = [];
     
     //Default starting variables
@@ -420,7 +421,7 @@ function drawSchoolButtons(){
 			.text("Select class for row " + (x+1));
 	}
 	
-	d3.csv("students2.csv", function(data){ //needed?
+	d3.csv("students_new2.csv", function(data){ //needed?
 			var groups = d3.nest()
 			 .key(function(d) { return d.School; })
 			 .key(function(d) { return d["Class Period"]; })
@@ -610,10 +611,19 @@ conditionButton.append("text")
  ******************************/	
 function drawDots(){
 	//Alter the range for Y axis
-	var min = d3.min(studentDataset, function(d) { return +d["Unit " + CURRENT_UNIT + " Learning Gain"];})
-	var max = d3.max(studentDataset, function(d) { return +d["Unit " + CURRENT_UNIT + " Learning Gain"];})
+	
+	var currentDataSet = studentDatasetUnit2;
+	if(CURRENT_UNIT == 4)
+		currentDataSet = studentDatasetUnit4;
+	
+	
+	
+	var min = d3.min(currentDataSet, function(d) { return +d["Learning Gain"];})
+	var max = d3.max(currentDataSet, function(d) { return +d["Learning Gain"];})
 	var yDottedOffset = Math.abs(max - min) * 0.1;
 	yScale.domain([min-yDottedOffset, max]); //TODO make min like 10% less than actual min or something
+	
+	console.log(min + " " + max);
 	
 	var currentShown = graphParams.slice(CURRENT_RANGE,CURRENT_RANGE+3);
 	
@@ -628,18 +638,18 @@ function drawDots(){
 			
 				//X Scale and Axis
 				//TODO nonstatic offset for domain, based on actual data domain, maybe 10%?
-				min = d3.min(studentDataset, function(d) { return +d[currentShown[i]];})
-				max = d3.max(studentDataset, function(d) { return +d[currentShown[i]];})
+				min = d3.min(currentDataSet, function(d) { return +d[currentShown[i]];})
+				max = d3.max(currentDataSet, function(d) { return +d[currentShown[i]];})
 				var xDottedOffset = Math.abs(max - min) * 0.1;
 			
-				var x = d3.scale.linear()
+				var xScale = d3.scale.linear()
 						.domain([min-xDottedOffset, max])
 						.clamp(true) //needed?
 						.range(defaultRange);
-							
+								
 				//X Axis
 				var xAxis = d3.svg.axis()
-						.scale(x)
+						.scale(xScale)
 						.orient("bottom")
 						.ticks(5, "");
 			
@@ -659,9 +669,9 @@ function drawDots(){
 				//Vertical Line
 				holder.append("line")
 						.attr("class", currentShown[i] + " zero axis")
-						.attr("x1", x(0))
+						.attr("x1", xScale(0))
 						.attr("y1", 0)
-						.attr("x2", x(0))
+						.attr("x2", xScale(0))
 						.attr("y2", graphHeight)
 			
 				//Horizontal Line
@@ -674,7 +684,7 @@ function drawDots(){
 										
 				//Redraw/Draw dots					
 				var dots = holder.selectAll("circle")
-					.data(studentDataset);
+					.data(currentDataSet);
 													
 				dots.enter().append("circle")
 					.attr("cy", 0)
@@ -682,7 +692,8 @@ function drawDots(){
 					.attr("r", 1.5);
 			
 				dots.attr("class", function(d) {
-								var t = d["Unit " + CURRENT_UNIT + " Pre-Test Type"].toUpperCase();
+								
+								/*var t = d["Unit " + CURRENT_UNIT + " Pre-Test Type"].toUpperCase();
 								if(CURRENT_PREPOST == "Post"){
 									if(t == "A")
 										t = "B";
@@ -693,7 +704,8 @@ function drawDots(){
 								}
 								if (t == "")
 									t = "unknown";
-								
+								*/
+								var t = "A";
 								var sc = CURRENT_ROW1.data()[0].school;
 								var per = CURRENT_ROW1.data()[0].period;
 								var row = CURRENT_ROW1.data()[0].row;
@@ -708,22 +720,25 @@ function drawDots(){
 								if (!allBarsSelected) {
 									dotSelection = setDotSelection(d, t);
 								}
-								if((t == "A" || t == "B") && inSelection)
+								/*if((t == "A" || t == "B") && inSelection)
 									return t + " dot " + dotSelection;
+								else*/
+								if(inSelection)
+									return "A dot " + dotSelection;
 								else
 									return "unknown dot " + dotSelection;
 						})
 					.attr("transform", function(d) { 
-								var gains = d["Unit " + CURRENT_UNIT + " Learning Gain"];
+								var gains = d["Learning Gain"];
 								var cat = +d[currentShown[i]];
 			
 								if(isNaN(gains) || isNaN(cat))
 									return "translate(0,0)";
 								else
-									return "translate(" + x(cat) + "," + yScale(+gains) + ")";
+									return "translate(" + xScale(cat) + "," + yScale(+gains) + ")";
 							})
 					.attr("opacity", function(d){ 
-						var gains = d["Unit " + CURRENT_UNIT + " Learning Gain"];
+						var gains = d["Learning Gain"];
 						var cat = +d[currentShown[i]];
 						return (isNaN(gains) || isNaN(cat)) ? 0.0 : 1.0;
 					})
@@ -772,11 +787,11 @@ function setDotSelection(dotData, dotType) {
 
 // version that does not nest by condition
 function drawGraphs() {
-	d3.csv("students2.csv", function(data){
+	d3.csv("students_new2.csv", function(data){
 		
 		//Assign loaded data to variables
-		studentDataset = data.map(function(d){return d;});
-		graphParams = d3.keys(data[0]).slice(9, 21); //only select the parameters we want to make graphs for 
+		studentDatasetUnit2 = data.map(function(d){return d;});
+		graphParams = d3.keys(data[0]).slice(17, 23); //only select the parameters we want to make graphs for 
 
 		d3.selectAll(graphParams.slice(0,3))
 			.each(function(d, i) {	
@@ -800,6 +815,12 @@ function drawGraphs() {
 			});
 		
 		drawDots();
+	});
+	
+	d3.csv("students_new4.csv", function(data){
+		
+		//Assign loaded data to variables
+		studentDatasetUnit4 = data.map(function(d){return d;});
 	});
 }
 
