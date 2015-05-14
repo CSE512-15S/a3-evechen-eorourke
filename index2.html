@@ -404,8 +404,6 @@ function changeSchool(button, data){
 		allBarsSelected = true;
 		selectedBars = [];
 		drawDots();
-	console.log(CURRENT_ROW1);
-	console.log(CURRENT_ROW2);
 }
 
 schoolButtons = [];
@@ -433,7 +431,7 @@ function drawSchoolButtons(){
 							for(x = 0; x < 2; x++){
 							var temp = sidebar.append("g")
 								.attr("class", "buttonHolder")
-								.attr("transform", "translate(900, " + (2*buttonHeight + (x*buttonHeight*6)) + ")");
+								.attr("transform", "translate(900, " + (1.5*buttonHeight + (x*buttonHeight*6)) + ")");
 							temp.append("rect")
 								.data([{row: (x+1), school: this.values[k].School, period:this.values[k]["Class Period"], condition: this.values[k].Condition }])
 								.attr("class", "switch unpressed")
@@ -623,7 +621,6 @@ function drawDots(){
 	var yDottedOffset = Math.abs(max - min) * 0.1;
 	yScale.domain([min-yDottedOffset, max]); //TODO make min like 10% less than actual min or something
 	
-	console.log(min + " " + max);
 	
 	var currentShown = graphParams.slice(CURRENT_RANGE,CURRENT_RANGE+3);
 	
@@ -705,7 +702,7 @@ function drawDots(){
 								if (t == "")
 									t = "unknown";
 								*/
-								var t = "A";
+								var t = "B";
 								var sc = CURRENT_ROW1.data()[0].school;
 								var per = CURRENT_ROW1.data()[0].period;
 								var row = CURRENT_ROW1.data()[0].row;
@@ -724,7 +721,7 @@ function drawDots(){
 									return t + " dot " + dotSelection;
 								else*/
 								if(inSelection)
-									return "A dot " + dotSelection;
+									return "B dot " + dotSelection;
 								else
 									return "unknown dot " + dotSelection;
 						})
@@ -791,7 +788,7 @@ function drawGraphs() {
 		
 		//Assign loaded data to variables
 		studentDatasetUnit2 = data.map(function(d){return d;});
-		graphParams = d3.keys(data[0]).slice(17, 23); //only select the parameters we want to make graphs for 
+		graphParams = d3.keys(data[0]).slice(17, 26); //only select the parameters we want to make graphs for 
 
 		d3.selectAll(graphParams.slice(0,3))
 			.each(function(d, i) {	
@@ -1074,7 +1071,7 @@ function onBarClick(bar_object) {
 		q = q + "." + i.substring(1);
 	}
 	
-	console.log("appended question: " + q + " type: " + t + " correctness: " + c);
+	//console.log("appended question: " + q + " type: " + t + " correctness: " + c);
 	selectedBars.push({question:q, test_type:t, correctness:c});
 	drawDots();
 }
@@ -1085,7 +1082,6 @@ function drawProblemBars(){
 	if (CURRENT_VARIABLE == "condition") {
 		problemsFile = "problems_condition.csv";
 	}
-	console.log(problemsFile);
 	
 	d3.csv(problemsFile, function(data){
 		problemsDataset = data.map(function(d){return d;});
